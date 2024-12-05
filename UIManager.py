@@ -40,21 +40,3 @@ class Button:
             for for_call in self.on_click:
                 for_call[0](*for_call[1], **for_call[2])
 
-
-class Window:
-
-    def __init__(self, background_color):
-        self.background_color = background_color
-        self.buttons = []
-
-    def add_button(self, button):
-        self.buttons.append(button)
-
-    def draw(self, screen):
-        screen.fill(self.background_color)
-        for button in self.buttons:
-            button.draw(screen)
-
-    def check_click(self, mouse_x, mouse_y):
-        for button in self.buttons:
-            button.check_click(mouse_x, mouse_y)
