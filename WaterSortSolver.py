@@ -1,9 +1,4 @@
-import io
-import pickle
 from collections import deque
-
-import numpy as np
-
 
 class Solver:
     def __init__(self, original_state, height):
@@ -14,28 +9,33 @@ class Solver:
         initial_state = []
         for i in range(len(self.original_state)):
             additional = [-1] * (self.height - len(self.original_state[i]))
-            initial_state.append(np.array(self.original_state[i] + additional))
+            initial_state.append(tuple(self.original_state[i] + additional))
 
-        initial_state = np.array(initial_state, dtype=object)
+        initial_state = tuple(initial_state)
 
         visited = set()
-
+        solution_path = {}
         queue_states = deque([initial_state])
 
         while len(queue_states):
-
             current_state = queue_states.popleft()
-            hashed_state = Solver.encode_state(current_state)
-
-            if hashed_state in visited:
+            if current_state in visited:
                 continue
 
             if Solver.solved(current_state):
-                print(current_state)
-                print(len(visited))
+                print(f"Visited states: {len(visited)}")
+                path = []
+                while current_state in solution_path:
+                    path.append(current_state)
+                    current_state = solution_path[current_state]
+                path.append(initial_state)
+                path.reverse()
+                for state in path:
+                    print(state)
+
                 break
 
-            visited.add(hashed_state)
+            visited.add(current_state)
 
             for i in range(len(current_state)):
                 if Solver.is_row_filled(current_state[i]):
@@ -47,15 +47,14 @@ class Solver:
                     if Solver.is_row_filled(current_state[j]) and current_state[j][0] != -1:
                         continue
 
-                    moved_state = current_state.copy()
-                    Solver.move(moved_state[i], moved_state[j])
-                    queue_states.append(moved_state)
-
+                    moved_state = Solver.move(current_state, i, j)
+                    if moved_state and moved_state not in visited and moved_state not in solution_path:
+                        queue_states.append(moved_state)
+                        solution_path[moved_state] = current_state
 
     def set_up(self, list_for_array):
         additional = [-1] * (self.height - len(list_for_array))
-        return np.array(list_for_array + additional)
-
+        return tuple(list_for_array + additional)
 
     @staticmethod
     def is_row_filled(row):
@@ -90,9 +89,16 @@ class Solver:
         return row[Solver.last_filled_index(row)]
 
     @staticmethod
-    def move(row_from, row_to):
+    def move(current_state, from_idx, to_idx):
+        row_from = current_state[from_idx]
+        row_to = current_state[to_idx]
+
         if not Solver.can_move(row_from, row_to):
-            return
+            return None
+
+        state_list = list(current_state)
+        row_from = list(row_from)
+        row_to = list(row_to)
 
         i = Solver.last_filled_index(row_from)
         j = Solver.last_filled_index(row_to)
@@ -105,13 +111,11 @@ class Solver:
             i -= 1
             j += 1
 
-    @staticmethod
-    def encode_state(state):
-        buffer = io.BytesIO()
-        pickle.dump(state, buffer)
-        return buffer.getvalue().decode('latin1')
+        state_list[from_idx] = tuple(row_from)
+        state_list[to_idx] = tuple(row_to)
 
-# Example usage:
-s = Solver([ [0,2,3,1], [2,0,1,3], [2,3,0,1], [1,0,3,2], [], []], 4)
+        return tuple(state_list)
+
+
+s = Solver([[0, 2, 3, 1, 0], [2, 0, 1, 3, 1], [2, 3, 0, 1, 2], [1, 0, 3, 2, 3], [], []], 5)
 s.solve()
-
