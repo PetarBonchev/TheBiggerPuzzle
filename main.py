@@ -18,6 +18,7 @@ while Utils.running:
             if event.button == 1:
                 windows.check_click(*event.pos)
 
+    windows.update()
     windows.draw()
 
     pygame.display.flip()

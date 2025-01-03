@@ -1,42 +1,72 @@
-import random
-import time
-
-class ColorWheel:
-
-    def __init__(self, color_count):
-        self.color_count = color_count
-        self.sequence = []
-
-    def __iter__(self):
-        return iter(self.sequence)
-
-    def add_random_color(self):
-        self.sequence.append(random.randrange(0, self.color_count))
-
+import Utils
+from UIManager import ColorWheel
+from random import randint
 
 class WheelGame:
 
+    WHEEL_RADIUS = 350
+    COLOR_DISPLAY_TIME = 30
+
     def __init__(self, color_count):
-        self._wheel = ColorWheel(color_count)
+        self._color_count = color_count
+        self._color_wheel = ColorWheel(color_count, Utils.screen_width // 2,
+                                       Utils.screen_height // 2, WheelGame.WHEEL_RADIUS)
+        self._pattern = []
+        self._game_state = 1
+        self._timer = 0
+        self._displayed_color = 0
+        self._color_to_receive = 0
 
-    def game_loop(self):
-        while True:
-            self._wheel.add_random_color()
-            self._print_current_pattern()
-            if not self._check_pattern():
-                break
-        print(f"Wrong! Score: {len(self._wheel.sequence) - 1}")
+    def draw(self, screen):
+        self._color_wheel.draw(screen)
 
-    def _print_current_pattern(self):
-        for color in self._wheel:
-            print(color)
-            time.sleep(.5)
+    def check_click(self, mouse_x, mouse_y):
+        clicked_color = self._color_wheel.check_click(mouse_x, mouse_y)
+        if 0 <= clicked_color < self._color_count:
+            self._receive_color(clicked_color)
 
-    def _check_pattern(self):
-        for color in self._wheel:
-            if int(input()) != color:
-                return False
-        return True
+    def update(self):
+        if self._game_state == 1:
+            self._pick_color()
+            self._game_state = 2
+        elif self._game_state == 2:
+            state = self._display_color()
+            self._game_state = state
+        elif self._game_state == 3:
+            self._timer += 1
+            if self._timer >= WheelGame.COLOR_DISPLAY_TIME:
+                self._timer = 0
+                self._stop_color_display()
+                self._game_state = 2
+        elif self._game_state == 4:
+            pass
+        elif self._game_state == -1:
+            for i in range(self._color_count):
+                self._color_wheel.highlight_sector(i)
+            self._game_state = -2
 
-game = WheelGame(3)
-game.game_loop()
+    def _pick_color(self):
+        new_color = randint(0, self._color_count - 1)
+        self._pattern.append(new_color)
+
+    def _display_color(self):
+        if self._displayed_color >= len(self._pattern):
+            self._displayed_color = 0
+            return 4
+        self._color_wheel.highlight_sector(self._pattern[self._displayed_color])
+        return 3
+
+    def _stop_color_display(self):
+        self._color_wheel.highlight_sector(self._pattern[self._displayed_color])
+        self._displayed_color += 1
+
+    def _receive_color(self, color_id):
+        if self._game_state != 4:
+            return
+        if self._pattern[self._color_to_receive] == color_id:
+            self._color_to_receive += 1
+            if self._color_to_receive >= len(self._pattern):
+                self._color_to_receive = 0
+                self._game_state = 1
+        else:
+            self._game_state = -1

@@ -5,12 +5,12 @@ class TableGenerator:
     MIN_TRAIL_LENGTH = 2
     MAX_OPERATIONS = 100
 
-    def __init__(self, width, height, colors):
-        self.colors = colors
+    def __init__(self, width, height, color_count):
+        self.colors = color_count
         self.height = height
         self.width = width
         self.not_visited = None
-        self.MAX_TRAIL_LENGTH = (width * height * 2) // colors
+        self.MAX_TRAIL_LENGTH = (width * height * 2) // color_count
 
     def generate(self):
         self.not_visited = set([(x, y) for x in range(self.width) for y in range(self.height)])
@@ -173,6 +173,3 @@ class TableGenerator:
     @staticmethod
     def _are_neighbours(x1, y1, x2, y2):
         return abs(x1 - x2) + abs(y1 - y2) == 1
-
-t = TableGenerator(8,10,5)
-print(t.generate())

@@ -72,7 +72,7 @@ class Board:
 
     def _generate(self):
         placed = 0
-        while placed < (3 * self.height * self.width) // 4:
+        while placed < (4 * self.height * self.width) // 7:
             x, y = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
             while random.random() < 0.8:
                 self._board[x, y] = 1
@@ -98,6 +98,6 @@ class Board:
                     self._board[x, y] = piece.state
 
 
-board = Board(4, 5)
+board = Board(40, 50)
 print(board)
 
