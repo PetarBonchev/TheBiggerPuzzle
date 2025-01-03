@@ -201,3 +201,87 @@ class Flask:
     def check_click(self, mouse_x, mouse_y):
         return self._bottom_left_x <= mouse_x <= self._bottom_left_x + Flask.PART_WIDTH and (
             self._bottom_left_y - self._height *Flask.PART_HEIGHT <= mouse_y <= self._bottom_left_y)
+
+
+class LoopPiece:
+    SIDES = 4
+    SIDE_WIDTH = 20
+    SIDE_HEIGHT = 50
+    BORDER_RADIUS = 20
+
+    def __init__(self, connections, top_left_x, top_left_y):
+
+        if type(connections) != list or len(connections) != LoopPiece.SIDES:
+            raise ValueError("Piece must take list with 4 elements")
+
+        if any(item != 0 and item != 1 for item in connections):
+            raise ValueError(
+                f"List 'connections' in Piece initialization must contain only values 0 and 1: {connections}")
+
+        self._connections = connections
+        self._top_left_x = top_left_x
+        self._top_left_y = top_left_y
+
+    def __repr__(self):
+        return f"Piece({self._connections})"
+
+    def draw(self, screen):
+        if self.up:
+            rect = pygame.Rect(self._top_left_x, self._top_left_y - LoopPiece.SIDE_HEIGHT + LoopPiece.SIDE_WIDTH,
+                               LoopPiece.SIDE_WIDTH, LoopPiece.SIDE_HEIGHT)
+            pygame.draw.rect(screen, pygame.Color('black'), rect, 0, LoopPiece.BORDER_RADIUS)
+        if self.right:
+            rect = pygame.Rect(self._top_left_x, self._top_left_y,
+                               LoopPiece.SIDE_HEIGHT, LoopPiece.SIDE_WIDTH)
+            pygame.draw.rect(screen, pygame.Color('black'), rect, 0, LoopPiece.BORDER_RADIUS)
+        if self.down:
+            rect = pygame.Rect(self._top_left_x, self._top_left_y,
+                               LoopPiece.SIDE_WIDTH, LoopPiece.SIDE_HEIGHT)
+            pygame.draw.rect(screen, pygame.Color('black'), rect, 0, LoopPiece.BORDER_RADIUS)
+        if self.left:
+            rect = pygame.Rect(self._top_left_x - LoopPiece.SIDE_HEIGHT + LoopPiece.SIDE_WIDTH, self._top_left_y,
+                               LoopPiece.SIDE_HEIGHT, LoopPiece.SIDE_WIDTH)
+            pygame.draw.rect(screen, pygame.Color('black'), rect, 0, LoopPiece.BORDER_RADIUS)
+        pygame.draw.circle(screen, pygame.Color('black'), (self._top_left_x + LoopPiece.SIDE_WIDTH // 2,
+                                self._top_left_y + LoopPiece.SIDE_WIDTH //2), LoopPiece.SIDE_WIDTH)
+
+    def check_click(self, mouse_x, mouse_y):
+        if self._top_left_x - LoopPiece.SIDE_HEIGHT + LoopPiece.SIDE_WIDTH <= mouse_x < (
+                self._top_left_x + LoopPiece.SIDE_HEIGHT) and (self._top_left_y - LoopPiece.SIDE_HEIGHT
+                + LoopPiece.SIDE_WIDTH) <= mouse_y < self._top_left_y + LoopPiece.SIDE_HEIGHT:
+            self.rotate()
+
+    def update(self):
+        pass
+
+    @property
+    def up(self):
+        return self._connections[0]
+
+    @property
+    def right(self):
+        return self._connections[1]
+
+    @property
+    def down(self):
+        return self._connections[2]
+
+    @property
+    def left(self):
+        return self._connections[3]
+
+    @property
+    def state(self):
+        return (self.up << 3) | (self.right << 2) | (self.down << 1) | self.left
+
+    def rotate(self, times=1):
+        if times % 4 == 1:
+            self._connections[0], self._connections[1], self._connections[2], self._connections[3] = (
+                self.left, self.up, self.right, self.down)
+        elif times % 4 == 2:
+            self._connections[0], self._connections[2] = self.down, self.up
+            self._connections[1], self._connections[3] = self.left, self.right
+        elif times % 4 == 3:
+            self._connections[0], self._connections[1], self._connections[2], self._connections[3] = (
+                self.right, self.down, self.left, self.up)
+

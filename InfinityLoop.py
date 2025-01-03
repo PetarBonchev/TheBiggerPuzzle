@@ -1,53 +1,7 @@
 import random
 import numpy as np
-
-class Piece:
-
-    SIDES = 4
-
-    def __init__(self, connections):
-
-        if type(connections) != list or len(connections) != Piece.SIDES:
-            raise ValueError("Piece must take list with 4 elements")
-
-        if any(item != 0 and item != 1 for item in connections):
-            raise ValueError(f"List 'connections' in Piece initialization must contain only values 0 and 1: {connections}")
-
-        self._connections = connections
-
-    def __repr__(self):
-        return f"Piece({self._connections})"
-
-    @property
-    def up(self):
-        return self._connections[0]
-
-    @property
-    def right(self):
-        return self._connections[1]
-
-    @property
-    def down(self):
-        return self._connections[2]
-
-    @property
-    def left(self):
-        return self._connections[3]
-
-    @property
-    def state(self):
-        return (self.up << 3) | (self.right << 2) | (self.down << 1) | self.left
-
-    def rotate(self, times=1):
-        if times % 4 == 1:
-            self._connections[0], self._connections[1], self._connections[2], self._connections[3] = (
-                self.left, self.up, self.right, self.down)
-        elif times % 4 == 2:
-            self._connections[0], self._connections[2] = self.down, self.up
-            self._connections[1], self._connections[3] = self.left, self.right
-        elif times % 4 == 3:
-            self._connections[0], self._connections[1], self._connections[2], self._connections[3] = (
-                self.right, self.down, self.left, self.up)
+import Utils
+from UIManager import LoopPiece
 
 
 class Board:
@@ -56,21 +10,27 @@ class Board:
         self.height = height
         self.width = width
         self._board = np.array([[0 for _ in range(width)] for _ in range(height)])
-        self._generate()
+        self._piece_length = 2 * LoopPiece.SIDE_HEIGHT - LoopPiece.SIDE_WIDTH
+        self._top_left_x = (Utils.screen_width - width * self._piece_length) // 2 - LoopPiece.SIDE_WIDTH + LoopPiece.SIDE_HEIGHT
+        self._top_left_y = (Utils.screen_height - height * self._piece_length) // 2 - LoopPiece.SIDE_WIDTH + LoopPiece.SIDE_HEIGHT
+        self._pieces = []
 
-    def __getitem__(self, item):
-        return self._board[item]
+        self.generate()
 
-    def __repr__(self):
-        board_repr = ""
-        for row in self._board:
-            row_repr = ""
-            for cell in row:
-                row_repr += str(cell) + " "
-            board_repr += row_repr + "\n"
-        return f"Board({self.width, self.height})\n" + board_repr
+    def draw(self, screen):
+        for piece in self._pieces:
+            piece.draw(screen)
 
-    def _generate(self):
+    def check_click(self, mouse_x, mouse_y):
+        for piece in self._pieces:
+            piece.check_click(mouse_x, mouse_y)
+
+    def update(self):
+        pass
+
+    def generate(self):
+        self._board = np.array([[0 for _ in range(self.width)] for _ in range(self.height)])
+        self._pieces.clear()
         placed = 0
         while placed < (4 * self.height * self.width) // 7:
             x, y = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
@@ -88,16 +48,12 @@ class Board:
             for y in range(self.width):
                 if self._board[x, y] == 1:
                     connections = [
-                        (1 if self._board[x - 1, y] else 0) if x > 0 else 0,  # Up
-                        (1 if self._board[x, y + 1] else 0) if y < self.width - 1 else 0,  # Right
-                        (1 if self._board[x + 1, y] else 0) if x < self.height - 1 else 0,  # Down
-                        (1 if self._board[x, y - 1] else 0) if y > 0 else 0  # Left
+                        (1 if self._board[x - 1, y] else 0) if x > 0 else 0,
+                        (1 if self._board[x, y + 1] else 0) if y < self.width - 1 else 0,
+                        (1 if self._board[x + 1, y] else 0) if x < self.height - 1 else 0,
+                        (1 if self._board[x, y - 1] else 0) if y > 0 else 0
                     ]
-                    piece = Piece(connections)
+                    piece = LoopPiece(connections, self._top_left_x + y * self._piece_length, self._top_left_y + x * self._piece_length)
                     piece.rotate(random.randint(0, 3))
                     self._board[x, y] = piece.state
-
-
-board = Board(40, 50)
-print(board)
-
+                    self._pieces.append(piece)
