@@ -23,6 +23,8 @@ class WheelGame:
         self._score_text.draw(screen)
 
     def check_click(self, mouse_x, mouse_y):
+        if self._game_state != 4:
+            return
         clicked_color = self._color_wheel.check_click(mouse_x, mouse_y)
         if 0 <= clicked_color < self._color_count:
             self._receive_color(clicked_color)

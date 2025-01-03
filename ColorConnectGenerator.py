@@ -106,7 +106,7 @@ class TableGenerator:
                         trails.append(trail_2)
                         return
 
-        #може да стигне дотук, накрая ще бъде проверено дали дължината на всички пътища е width * height
+        #може да стигне дотук, накрая ще бъде проверено дали дължината на всички пътища е width * _height
 
     @staticmethod
     def _merge_multi_length_trail(trails, to_merge):
@@ -156,7 +156,7 @@ class TableGenerator:
                         trails.append(trail_2)
                         return
 
-        # може да стигне дотук, накрая ще бъде проверено дали дължината на всички пътища е width * height
+        # може да стигне дотук, накрая ще бъде проверено дали дължината на всички пътища е width * _height
 
     @staticmethod
     def _split_longest_trail(trails):

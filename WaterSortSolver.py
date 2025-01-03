@@ -1,11 +1,18 @@
+import time
 from collections import deque
 
 class Solver:
+
+    TIME_LIMIT = 5
+
     def __init__(self, original_state, height):
         self.height = height
         self.original_state = original_state
 
     def solve(self):
+        start_time = time.time()
+        time_limit = Solver.TIME_LIMIT
+
         initial_state = []
         for i in range(len(self.original_state)):
             additional = [-1] * (self.height - len(self.original_state[i]))
@@ -18,22 +25,24 @@ class Solver:
         queue_states = deque([initial_state])
 
         while len(queue_states):
+            current_time = time.time()
+            if current_time - start_time > time_limit:
+                print("Time!")
+                return None
+
             current_state = queue_states.popleft()
             if current_state in visited:
                 continue
 
             if Solver.solved(current_state):
-                print(f"Visited states: {len(visited)}")
+                print(f"Done!: {len(visited)}")
                 path = []
                 while current_state in solution_path:
                     path.append(current_state)
                     current_state = solution_path[current_state]
                 path.append(initial_state)
                 path.reverse()
-                for state in path:
-                    print(state)
-
-                break
+                return path
 
             visited.add(current_state)
 
@@ -51,6 +60,8 @@ class Solver:
                     if moved_state and moved_state not in visited and moved_state not in solution_path:
                         queue_states.append(moved_state)
                         solution_path[moved_state] = current_state
+
+        return None
 
     def set_up(self, list_for_array):
         additional = [-1] * (self.height - len(list_for_array))
@@ -115,7 +126,3 @@ class Solver:
         state_list[to_idx] = tuple(row_to)
 
         return tuple(state_list)
-
-
-s = Solver([[0, 2, 3, 1, 0], [2, 0, 1, 3, 1], [2, 3, 0, 1, 2], [1, 0, 3, 2, 3], [], []], 5)
-s.solve()

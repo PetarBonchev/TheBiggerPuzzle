@@ -51,6 +51,7 @@ class Button:
     def update(self):
         pass
 
+
 class ColorWheel:
 
     EDGE_POINTS = 100
@@ -125,3 +126,72 @@ class ColorWheel:
 
     def stop_all_highlight(self):
         self._highlighted.clear()
+
+
+class Flask:
+
+    PART_WIDTH = 55
+    PART_HEIGHT = 60
+    BOTTOM_CORNERS_RADIUS = 22
+
+    def __init__(self, height, bottom_left_x, bottom_left_y):
+        self._bottom_left_x = bottom_left_x
+        self._bottom_left_y = bottom_left_y
+        self._height = height
+        self.content = []
+
+    @property
+    def top_color(self):
+        if self.content:
+            return self.content[-1]
+        return -1
+
+    @property
+    def top_count(self):
+        if len(self.content) == 0:
+            return 0
+        i = len(self.content) - 1
+        while i >= 0 and self.content[i] == self.content[-1]:
+            i -= 1
+        return len(self.content) - i - 1
+
+    @property
+    def water_height(self):
+        return len(self.content)
+
+    @property
+    def complete(self):
+        return len(self.content) == self.top_count == self._height or len(self.content) == 0
+
+    def move_top(self):
+        count_ = self.top_count
+        top_elements = self.content[-count_:]
+        self.content = self.content[:-count_]
+        return top_elements
+
+    def receive_top(self, color_stream):
+        self.content.extend(color_stream)
+
+    def draw(self, screen):
+        for i in range(self._height):
+            color = pygame.Color('grey') if i >= len(self.content) \
+                else Utils.COLORS[self.content[i] % len(Utils.COLORS)]
+            if i == 0:
+                rect = pygame.Rect(self._bottom_left_x, self._bottom_left_y - Flask.PART_HEIGHT,
+                                   Flask.PART_WIDTH, Flask.PART_HEIGHT)
+                pygame.draw.rect(screen, color, rect, 0, 0, 0, 0,
+                                 Flask.BOTTOM_CORNERS_RADIUS, Flask.BOTTOM_CORNERS_RADIUS)
+                pygame.draw.rect(screen, pygame.Color('black'), rect, 2, 0, 0, 0,
+                                 Flask.BOTTOM_CORNERS_RADIUS, Flask.BOTTOM_CORNERS_RADIUS)
+            else:
+                rect = pygame.Rect(self._bottom_left_x, self._bottom_left_y - (i + 1) * Flask.PART_HEIGHT,
+                                   Flask.PART_WIDTH, Flask.PART_HEIGHT)
+                pygame.draw.rect(screen, color, rect)
+                pygame.draw.rect(screen, pygame.Color('black'), rect, 2)
+
+    def update(self):
+        pass
+
+    def check_click(self, mouse_x, mouse_y):
+        return self._bottom_left_x <= mouse_x <= self._bottom_left_x + Flask.PART_WIDTH and (
+            self._bottom_left_y - self._height *Flask.PART_HEIGHT <= mouse_y <= self._bottom_left_y)

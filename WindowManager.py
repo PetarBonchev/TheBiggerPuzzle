@@ -1,6 +1,7 @@
 import pygame
 import Utils
-from UIManager import Button
+from UIManager import Button, Flask
+from WaterSort import WaterSort
 from WheelOfColors import WheelGame
 
 
@@ -33,6 +34,7 @@ class WindowDefiner:
     def fill_window_manager():
         WindowManager.instance.add_window(WindowDefiner.define_main_window())
         WindowManager.instance.add_window(WindowDefiner.define_wheel_of_colors_window())
+        WindowManager.instance.add_window(WindowDefiner.define_water_sort_window())
 
     @staticmethod
     def define_main_window():
@@ -64,6 +66,7 @@ class WindowDefiner:
         water_sort = Button(325, 325, Utils.screen_width / 2 , 505,
                                  pygame.Color('green'), "Water sort", pygame.Color('black'), 25,
                                  pygame.Color('purple'), 10)
+        water_sort.add_on_click(WindowManager.instance.go_to_window, 2)
 
         window.add_game_object(title)
         window.add_game_object(quit_button)
@@ -97,6 +100,20 @@ class WindowDefiner:
 
         return window
 
+    @staticmethod
+    def define_water_sort_window():
+        window = Window(pygame.Color('grey'))
+
+        quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
+                             "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
+        quit_button.add_on_click(WindowManager.instance.go_to_window, 0)
+
+        water_sort = WaterSort(4, 6)
+
+        window.add_game_object(quit_button)
+        window.add_game_object(water_sort)
+
+        return window
 
 class WindowManager:
 
