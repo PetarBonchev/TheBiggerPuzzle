@@ -78,13 +78,21 @@ class WindowDefiner:
     def define_wheel_of_colors_window():
         window = Window(pygame.Color('grey'))
 
+        score_text = Button(600, 100, Utils.screen_width // 2 - 300, 10, pygame.Color('Green'),
+                            'Score: 0', pygame.Color('black'), 50, pygame.Color('black'), 2)
+
+        wheel_game = WheelGame(6, score_text)
+
         quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
                              "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
         quit_button.add_on_click(WindowManager.instance.go_to_window, 0)
 
-        wheel_game = WheelGame(6)
+        restart_button = Button(50, 50, 70, 10, pygame.Color('orange'),
+                             "o", pygame.Color('black'), 50, pygame.Color('black'), 2)
+        restart_button.add_on_click(wheel_game.restart)
 
         window.add_game_object(quit_button)
+        window.add_game_object(restart_button)
         window.add_game_object(wheel_game)
 
         return window

@@ -4,9 +4,8 @@ import Utils
 
 
 class Button:
-
-    def __init__(self, width, height, top_left_x, top_left_y, color, text = None, text_color = None,
-                 text_size = None, outline_color = None, outline_width = None):
+    def __init__(self, width, height, top_left_x, top_left_y, color, text=None, text_color=None,
+                 text_size=None, outline_color=None, outline_width=None):
         self.top_left_x = top_left_x
         self.top_left_y = top_left_y
         self.width = width
@@ -16,24 +15,30 @@ class Button:
         self.outline_width = outline_width
         self.outline_color = outline_color
 
+        self.rendered_text = None
+        self.text_rect = None
         if text:
-            font = pygame.font.Font(None, text_size)
-            self.rendered_text = font.render(text, True, text_color)
-            center_x = top_left_x + width // 2
-            center_y = top_left_y + height // 2
-            self.text_rect = self.rendered_text.get_rect(center=(center_x, center_y))
-            self.text_rect.centery += self.rendered_text.get_height() // 10
+            self.text_color = text_color
+            self.font = pygame.font.Font(None, text_size)
+            self.set_text(text)
 
         self.on_click = []
 
+    def set_text(self, text):
+        self.rendered_text = self.font.render(text, True, self.text_color)
+        center_x = self.top_left_x + self.width // 2
+        center_y = self.top_left_y + self.height // 2
+        self.text_rect = self.rendered_text.get_rect(center=(center_x, center_y))
+
     def draw(self, screen):
         pygame.draw.rect(screen, self.color, pygame.Rect(self.top_left_x, self.top_left_y,
-                                                         self.width, self.height), max(self.width, self.height))
+                                                         self.width, self.height))
         if self.rendered_text:
             screen.blit(self.rendered_text, self.text_rect)
         if self.outline_color:
             pygame.draw.rect(screen, self.outline_color, pygame.Rect(self.top_left_x, self.top_left_y,
-                                                         self.width, self.height), self.outline_width)
+                                                                     self.width, self.height), self.outline_width)
+
     def add_on_click(self, func, *args, **kwargs):
         self.on_click.append((func, args, kwargs))
 
@@ -46,19 +51,19 @@ class Button:
     def update(self):
         pass
 
-
 class ColorWheel:
 
     EDGE_POINTS = 100
-    CENTER_RATIO = 1 / 5
+    CENTER_RATIO = 1 / 4
     OUTLINES_WIDTH = 5
+    HIGHLIGHT_TIME = 30
 
     def __init__(self, color_count, center_x, center_y, radius):
         self._color_count = color_count
         self._center_x = center_x
         self._center_y = center_y
         self._radius = radius
-        self._highlighted = set()
+        self._highlighted = {}
 
     def draw(self, screen):
         angle_step = 2 * math.pi / self._color_count
@@ -68,6 +73,9 @@ class ColorWheel:
             color = Utils.COLORS[i % len(Utils.COLORS)]
             if i in self._highlighted:
                 color = pygame.Color('White')
+                self._highlighted[i] -= 1
+                if self._highlighted[i] <= 0:
+                    self._highlighted.pop(i)
 
             points = [(self._center_x, self._center_y)]
             for j in range(ColorWheel.EDGE_POINTS):
@@ -106,13 +114,14 @@ class ColorWheel:
             return -1
 
         sector_id = int(click_angle // angle_step)
+        self._highlighted[sector_id] = ColorWheel.HIGHLIGHT_TIME // 3
         return sector_id
 
     def update(self):
         pass
 
     def highlight_sector(self, sector_id):
-        if sector_id in self._highlighted:
-            self._highlighted.remove(sector_id)
-        else:
-            self._highlighted.add(sector_id)
+        self._highlighted[sector_id] = ColorWheel.HIGHLIGHT_TIME
+
+    def stop_all_highlight(self):
+        self._highlighted.clear()

@@ -18,4 +18,5 @@ COLORS = [
     (178, 223, 138)
 ]
 
+WOC_COLOR_DISPLAY_TIME = 30
 # moje bi sloji vsi4ki konstanti
