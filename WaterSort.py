@@ -41,13 +41,19 @@ class WaterSort:
                 pressed_flask = True
                 if self._selected_flask_id == -1:
                     self._selected_flask_id = i
+                    flask.select()
                 else:
                     self.move_liquid(self._selected_flask_id, i)
+                    self._flasks[self._selected_flask_id].deselect()
                     self._selected_flask_id = -1
                     if self.complete():
                         self._game_state = 3
-        if not pressed_flask:
+        if not pressed_flask and self._selected_flask_id != -1:
+            self._flasks[self._selected_flask_id].deselect()
             self._selected_flask_id = -1
+
+    def restart(self):
+        self._game_state = 1
 
     def complete(self):
         return all(flask.complete for flask in self._flasks)

@@ -79,7 +79,7 @@ class ColorWheel:
                     self._highlighted.pop(i)
 
             points = [(self._center_x, self._center_y)]
-            for j in range(ColorWheel.EDGE_POINTS):
+            for j in range(ColorWheel.EDGE_POINTS + 1):
                 angle = start_angle + j * (end_angle - start_angle) / ColorWheel.EDGE_POINTS
                 x = self._center_x + self._radius * math.cos(angle)
                 y = self._center_y - self._radius * math.sin(angle)
@@ -171,6 +171,12 @@ class Flask:
 
     def receive_top(self, color_stream):
         self.content.extend(color_stream)
+
+    def select(self):
+        self._bottom_left_y -= 20
+
+    def deselect(self):
+        self._bottom_left_y += 20
 
     def draw(self, screen):
         for i in range(self._height):
