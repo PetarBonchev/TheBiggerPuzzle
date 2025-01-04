@@ -13,7 +13,7 @@ class TableGenerator:
         self.MAX_TRAIL_LENGTH = (width * height * 2) // color_count
 
     def generate(self):
-        self.not_visited = set([(x, y) for x in range(self.width) for y in range(self.height)])
+        self.not_visited = set([(x, y) for x in range(self.height) for y in range(self.width)])
         trails = []
 
         while self.not_visited:

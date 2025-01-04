@@ -1,5 +1,6 @@
 import pygame
 import Utils
+from ColorConnect import ColorConnect
 from InfinityLoop import Board
 from UIManager import Button
 from WaterSort import WaterSort
@@ -37,6 +38,7 @@ class WindowDefiner:
         WindowManager.instance.add_window(WindowDefiner.define_wheel_of_colors_window())
         WindowManager.instance.add_window(WindowDefiner.define_water_sort_window())
         WindowManager.instance.add_window(WindowDefiner.define_infinity_loop_window())
+        WindowManager.instance.add_window(WindowDefiner.define_color_connect_window())
 
     @staticmethod
     def define_main_window():
@@ -60,6 +62,7 @@ class WindowDefiner:
         flow_free = Button(325, 325, Utils.screen_width / 2 , 180,
                                  pygame.Color('green'), "Flow free", pygame.Color('black'), 25,
                                  pygame.Color('purple'), 10)
+        flow_free.add_on_click(WindowManager.instance.go_to_window, 4)
 
         infinity_loop = Button(325, 325, Utils.screen_width / 2 - 325, 505,
                                  pygame.Color('green'), "Infinity loop", pygame.Color('black'), 25,
@@ -138,6 +141,24 @@ class WindowDefiner:
         window.add_game_object(quit_button)
         window.add_game_object(restart_button)
         window.add_game_object(board)
+
+        return window
+
+    @staticmethod
+    def define_color_connect_window():
+        window = Window(pygame.Color('grey'))
+
+        grid = ColorConnect(5, 8, 5)
+        quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
+                             "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
+        quit_button.add_on_click(WindowManager.instance.go_to_window, 0)
+        restart_button = Button(50, 50, 70, 10, pygame.Color('orange'),
+                                "o", pygame.Color('black'), 50, pygame.Color('black'), 2)
+        restart_button.add_on_click(grid.generate)
+
+        window.add_game_object(quit_button)
+        window.add_game_object(restart_button)
+        window.add_game_object(grid)
 
         return window
 

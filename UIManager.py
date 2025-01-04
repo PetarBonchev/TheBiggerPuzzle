@@ -286,3 +286,50 @@ class LoopPiece:
             self._connections[0], self._connections[1], self._connections[2], self._connections[3] = (
                 self.right, self.down, self.left, self.up)
 
+
+class PointConnect:
+
+    def __init__(self, center_x, center_y, radius, color, click_box_size, board_x, board_y):
+        self._radius = radius
+        self._click_box_size = click_box_size
+        self._center_y = center_y
+        self._center_x = center_x
+        self.board_x = board_x
+        self.board_y = board_y
+        self.color = color
+        self.prev = None
+        self.next = None
+
+    def draw(self, screen):
+        pygame.draw.circle(screen, self.color, (self._center_x, self._center_y), self._radius)
+
+    def check_click(self, mouse_x, mouse_y):
+        return self._center_x - self._click_box_size // 2 <= mouse_x < self._center_x + self._click_box_size // 2 and (
+            self._center_y - self._click_box_size // 2 <= mouse_y < self._center_y + self._click_box_size // 2)
+
+    def update(self):
+        pass
+
+
+class LineConnect:
+
+    def __init__(self, center_x, center_y, color, side_size, board_x, board_y):
+        self._side_size = side_size
+        self.color = color
+        self._center_y = center_y
+        self._center_x = center_x
+        self.board_x = board_x
+        self.board_y = board_y
+        self.prev = None
+        self.next = None
+
+    def draw(self, screen):
+        pygame.draw.rect(screen, self.color, (self._center_x - self._side_size // 2, self._center_y -
+                                               self._side_size // 2, self._side_size, self._side_size))
+
+    def check_click(self, mouse_x, mouse_y):
+        return self._center_x - self._side_size // 2 <= mouse_x < self._center_x + self._side_size // 2 and (
+                self._center_y - self._side_size // 2 <= mouse_y < self._center_y + self._side_size // 2)
+
+    def update(self):
+        pass
