@@ -10,34 +10,40 @@ class Board:
         self.height = height
         self.width = width
         self._board = np.array([[0 for _ in range(width)] for _ in range(height)])
+        self._piece_board = np.array([[None for _ in range(width)] for _ in range(height)])
         self._piece_length = 2 * LoopPiece.SIDE_HEIGHT - LoopPiece.SIDE_WIDTH
         self._top_left_x = (Utils.screen_width - width * self._piece_length) // 2 - LoopPiece.SIDE_WIDTH + LoopPiece.SIDE_HEIGHT
         self._top_left_y = (Utils.screen_height - height * self._piece_length) // 2 - LoopPiece.SIDE_WIDTH + LoopPiece.SIDE_HEIGHT
-        self._pieces = []
 
         self.generate()
 
     def draw(self, screen):
-        for piece in self._pieces:
-            piece.draw(screen)
+        for i in range(len(self._piece_board)):
+            for j in range(len(self._piece_board[i])):
+                if self._piece_board[i, j]:
+                    self._piece_board[i, j].draw(screen)
 
     def check_click(self, mouse_x, mouse_y):
-        for piece in self._pieces:
-            piece.check_click(mouse_x, mouse_y)
+        for i in range(len(self._piece_board)):
+            for j in range(len(self._piece_board[i])):
+                if self._piece_board[i, j]:
+                    self._piece_board[i, j].check_click(mouse_x, mouse_y)
+        if self._is_solved():
+            self.generate()
 
     def update(self):
         pass
 
     def generate(self):
         self._board = np.array([[0 for _ in range(self.width)] for _ in range(self.height)])
-        self._pieces.clear()
+        self._piece_board = np.array([[None for _ in range(self.width)] for _ in range(self.height)])
         for i in range(self.height):
             for j in range(self.width):
                 if random.random() > 0.5:
                     self._board[i, j] = 1
 
         for i in range(5):
-            self.game_of_life()
+            self._game_of_life()
 
         for x in range(self.height):
             for y in range(self.width):
@@ -51,9 +57,27 @@ class Board:
                     piece = LoopPiece(connections, self._top_left_x + y * self._piece_length, self._top_left_y + x * self._piece_length)
                     piece.rotate(random.randint(0, 3))
                     self._board[x, y] = piece.state
-                    self._pieces.append(piece)
+                    self._piece_board[x, y] = piece
 
-    def game_of_life(self):
+    def _is_solved(self):
+        for i in range(len(self._piece_board)):
+            for j in range(len(self._piece_board[i])):
+                piece = self._piece_board[i, j]
+                if piece:
+                    if piece.up != (self._piece_board[i - 1, j].down if i > 0 and self._piece_board[i - 1, j] else 0):
+                        return False
+                    if piece.right != (
+                    self._piece_board[i, j + 1].left if j < self.width - 1 and self._piece_board[i, j + 1] else 0):
+                        return False
+                    if piece.down != (
+                    self._piece_board[i + 1, j].up if i < self.height - 1 and self._piece_board[i + 1, j] else 0):
+                        return False
+                    if piece.left != (
+                    self._piece_board[i, j - 1].right if j > 0 and self._piece_board[i, j - 1] else 0):
+                        return False
+        return True
+
+    def _game_of_life(self):
         new_board = np.copy(self._board)
         for x in range(self.height):
             for y in range(self.width):

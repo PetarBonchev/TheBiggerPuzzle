@@ -242,6 +242,9 @@ class LoopPiece:
             rect = pygame.Rect(self._top_left_x - LoopPiece.SIDE_HEIGHT + LoopPiece.SIDE_WIDTH, self._top_left_y,
                                LoopPiece.SIDE_HEIGHT, LoopPiece.SIDE_WIDTH)
             pygame.draw.rect(screen, pygame.Color('black'), rect)
+        if sum(self._connections) == 1:
+            pygame.draw.circle(screen, pygame.Color('black'), (self._top_left_x + LoopPiece.SIDE_WIDTH // 2,
+                                self._top_left_y + LoopPiece.SIDE_WIDTH // 2), 3 * LoopPiece.SIDE_WIDTH // 2)
 
     def check_click(self, mouse_x, mouse_y):
         if self._top_left_x - LoopPiece.SIDE_HEIGHT + LoopPiece.SIDE_WIDTH <= mouse_x < (
