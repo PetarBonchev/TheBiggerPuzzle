@@ -3,7 +3,7 @@ from collections import deque
 
 class Solver:
 
-    TIME_LIMIT = 5
+    TIME_LIMIT = 2
 
     def __init__(self, original_state, height):
         self.height = height
@@ -30,12 +30,14 @@ class Solver:
                 print("Time!")
                 return None
 
+            queue_states = deque(sorted(queue_states, key=Solver.calculate_score, reverse=True))
             current_state = queue_states.popleft()
             if current_state in visited:
                 continue
 
             if Solver.solved(current_state):
                 print(f"Done!: {len(visited)}")
+                print(current_time - start_time)
                 path = []
                 while current_state in solution_path:
                     path.append(current_state)
@@ -62,6 +64,41 @@ class Solver:
                         solution_path[moved_state] = current_state
 
         return None
+
+    @staticmethod
+    def calculate_score(state):
+        score = 0
+        for flask in state:
+            if flask[0] == -1:
+                score += 5
+            else:
+                consecutive_count = 1
+                for i in range(1, len(flask)):
+                    if flask[i] != -1 and flask[i] == flask[i - 1]:
+                        consecutive_count += 1
+                    else:
+                        if consecutive_count > 1:
+                            score += Solver.calculate_consecutive_score(consecutive_count,
+                                                                        i - consecutive_count == 0)
+                        consecutive_count = 1
+                if consecutive_count > 1:
+                    score += Solver.calculate_consecutive_score(consecutive_count, True)
+        return score
+
+    @staticmethod
+    def calculate_consecutive_score(count, at_bottom):
+        if count == 2:
+            base_score = 1
+        elif count == 3:
+            base_score = 2
+        elif count == 4:
+            base_score = 4
+        elif count == 5:
+            base_score = 7
+        else:
+            base_score = 7
+
+        return base_score << 1 if at_bottom else base_score
 
     def set_up(self, list_for_array):
         additional = [-1] * (self.height - len(list_for_array))

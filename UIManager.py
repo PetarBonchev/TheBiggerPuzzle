@@ -205,7 +205,7 @@ class Flask:
 
 class LoopPiece:
     SIDES = 4
-    SIDE_WIDTH = 20
+    SIDE_WIDTH = 15
     SIDE_HEIGHT = 50
     BORDER_RADIUS = 20
 
@@ -229,21 +229,19 @@ class LoopPiece:
         if self.up:
             rect = pygame.Rect(self._top_left_x, self._top_left_y - LoopPiece.SIDE_HEIGHT + LoopPiece.SIDE_WIDTH,
                                LoopPiece.SIDE_WIDTH, LoopPiece.SIDE_HEIGHT)
-            pygame.draw.rect(screen, pygame.Color('black'), rect, 0, LoopPiece.BORDER_RADIUS)
+            pygame.draw.rect(screen, pygame.Color('black'), rect)
         if self.right:
             rect = pygame.Rect(self._top_left_x, self._top_left_y,
                                LoopPiece.SIDE_HEIGHT, LoopPiece.SIDE_WIDTH)
-            pygame.draw.rect(screen, pygame.Color('black'), rect, 0, LoopPiece.BORDER_RADIUS)
+            pygame.draw.rect(screen, pygame.Color('black'), rect)
         if self.down:
             rect = pygame.Rect(self._top_left_x, self._top_left_y,
                                LoopPiece.SIDE_WIDTH, LoopPiece.SIDE_HEIGHT)
-            pygame.draw.rect(screen, pygame.Color('black'), rect, 0, LoopPiece.BORDER_RADIUS)
+            pygame.draw.rect(screen, pygame.Color('black'), rect)
         if self.left:
             rect = pygame.Rect(self._top_left_x - LoopPiece.SIDE_HEIGHT + LoopPiece.SIDE_WIDTH, self._top_left_y,
                                LoopPiece.SIDE_HEIGHT, LoopPiece.SIDE_WIDTH)
-            pygame.draw.rect(screen, pygame.Color('black'), rect, 0, LoopPiece.BORDER_RADIUS)
-        pygame.draw.circle(screen, pygame.Color('black'), (self._top_left_x + LoopPiece.SIDE_WIDTH // 2,
-                                self._top_left_y + LoopPiece.SIDE_WIDTH //2), LoopPiece.SIDE_WIDTH)
+            pygame.draw.rect(screen, pygame.Color('black'), rect)
 
     def check_click(self, mouse_x, mouse_y):
         if self._top_left_x - LoopPiece.SIDE_HEIGHT + LoopPiece.SIDE_WIDTH <= mouse_x < (

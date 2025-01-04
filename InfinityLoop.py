@@ -31,18 +31,13 @@ class Board:
     def generate(self):
         self._board = np.array([[0 for _ in range(self.width)] for _ in range(self.height)])
         self._pieces.clear()
-        placed = 0
-        while placed < (4 * self.height * self.width) // 7:
-            x, y = random.randint(0, self.height - 1), random.randint(0, self.width - 1)
-            while random.random() < 0.8:
-                self._board[x, y] = 1
-                placed += 1
-                for i in range(20):
-                    direction = random.choice([(0, -1), (1, 0), (0, 1), (-1, 0)])
-                    x, y = x + direction[1], y + direction[0]
-                    if 0 <= x < self.height and 0 <= y < self.width and self._board[x][y] == 0:
-                        break
-                    x, y = x - direction[1], y - direction[0]
+        for i in range(self.height):
+            for j in range(self.width):
+                if random.random() > 0.5:
+                    self._board[i, j] = 1
+
+        for i in range(5):
+            self.game_of_life()
 
         for x in range(self.height):
             for y in range(self.width):
@@ -57,3 +52,27 @@ class Board:
                     piece.rotate(random.randint(0, 3))
                     self._board[x, y] = piece.state
                     self._pieces.append(piece)
+
+    def game_of_life(self):
+        new_board = np.copy(self._board)
+        for x in range(self.height):
+            for y in range(self.width):
+                live_neighbours = sum([
+                    self._board[x - 1, y - 1] if x > 0 and y > 0 else 0,
+                    self._board[x - 1, y] if x > 0 else 0,
+                    self._board[x - 1, y + 1] if x > 0 and y < self.width - 1 else 0,
+                    self._board[x, y - 1] if y > 0 else 0,
+                    self._board[x, y + 1] if y < self.width - 1 else 0,
+                    self._board[x + 1, y - 1] if x < self.height - 1 and y > 0 else 0,
+                    self._board[x + 1, y] if x < self.height - 1 else 0,
+                    self._board[x + 1, y + 1] if x < self.height - 1 and y < self.width - 1 else 0
+                ])
+
+                if self._board[x, y] == 1:
+                    if live_neighbours < 2 or live_neighbours > 6:
+                        new_board[x, y] = 0
+                else:
+                    if live_neighbours < 3:
+                        new_board[x, y] = 1
+
+        self._board = new_board
