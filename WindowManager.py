@@ -120,8 +120,13 @@ class WindowDefiner:
                                 "o", pygame.Color('black'), 50, pygame.Color('black'), 2)
         restart_button.add_on_click(water_sort.restart)
 
+        undo_button = Button(50, 50, 130, 10, pygame.Color('orange'),
+                                "<", pygame.Color('black'), 50, pygame.Color('black'), 2)
+        undo_button.add_on_click(water_sort.undo)
+
         window.add_game_object(quit_button)
         window.add_game_object(restart_button)
+        window.add_game_object(undo_button)
         window.add_game_object(water_sort)
 
         return window

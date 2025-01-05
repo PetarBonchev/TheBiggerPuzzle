@@ -1,3 +1,4 @@
+import copy
 import random
 
 import WaterSortSolver
@@ -16,6 +17,7 @@ class WaterSort:
         self._initialize_flasks()
         self._game_state = 1
         self._selected_flask_id = -1
+        self._actions = []
 
     def draw(self, screen):
         for flask in self._flasks:
@@ -27,6 +29,7 @@ class WaterSort:
             solver = WaterSortSolver.Solver([flask.content for flask in self._flasks], self._height)
             if solver.solve():
                 self._game_state = 2
+                self._actions.append(tuple(copy.deepcopy(flask.content) for flask in self._flasks))
         elif self._game_state == 2:
             pass
         elif self._game_state == 3:
@@ -54,6 +57,7 @@ class WaterSort:
 
     def restart(self):
         self._game_state = 1
+        self._actions = []
 
     def complete(self):
         return all(flask.complete for flask in self._flasks)
@@ -69,6 +73,7 @@ class WaterSort:
         max_space = min(self._height - self._flasks[to_id].water_height, len(from_top))
         self._flasks[to_id].receive_top(from_top[:max_space])
         self._flasks[from_id].receive_top(from_top[max_space:])
+        self._actions.append(tuple(copy.deepcopy(flask.content) for flask in self._flasks))
 
     def random_fill(self):
         self._flasks.clear()
@@ -77,6 +82,18 @@ class WaterSort:
         random.shuffle(water_mix)
         for i in range(self._flask_count - WaterSort.EMPTY_FLASKS):
             self._flasks[i].receive_top(water_mix[i * self._height: (i + 1) * self._height])
+
+    def undo(self):
+        for action in self._actions:
+            print('action:')
+            for content in action:
+                print(content)
+
+        if len(self._actions) > 1:
+            state = self._actions[-2]
+            self._actions.pop(-1)
+            for i, content in enumerate(state):
+                self._flasks[i].content = copy.deepcopy(content)
 
     def _initialize_flasks(self):
         total_flasks_width = Flask.PART_WIDTH * self._flask_count + (self._flask_count - 1) * WaterSort.SPACE_BETWEEN_FLASKS
