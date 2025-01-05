@@ -110,7 +110,7 @@ class WindowDefiner:
     def define_water_sort_window():
         window = Window(pygame.Color('grey'))
 
-        water_sort = WaterSort(5, 10)
+        water_sort = WaterSort(5, 8)
 
         quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
                              "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
@@ -148,7 +148,7 @@ class WindowDefiner:
     def define_color_connect_window():
         window = Window(pygame.Color('grey'))
 
-        grid = ColorConnect(5, 8, 5)
+        grid = ColorConnect(6, 8, 5)
         quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
                              "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
         quit_button.add_on_click(WindowManager.instance.go_to_window, 0)

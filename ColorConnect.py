@@ -7,8 +7,8 @@ from UIManager import PointConnect, LineConnect
 
 class ColorConnect:
 
-    TILE_SIZE = 60
-    POINT_RADIUS = 20
+    TILE_SIZE = 70
+    POINT_RADIUS = 30
 
     def __init__(self, width, height, color_count):
         self._width = width
@@ -20,6 +20,7 @@ class ColorConnect:
         self._board = [[None for _ in range(self._width)] for _ in range(self._height)]
         self._point_pairs = {}
         self._selected_item = None
+        self._time_pressed = 0
 
         self.generate()
 
@@ -42,13 +43,19 @@ class ColorConnect:
         if self._selected_item:
             if not pygame.mouse.get_pressed()[0]:
                 if isinstance(self._selected_item, PointConnect):
-                    self._remove_line(self._selected_item)
-                    other_x, other_y = self._point_pairs[(self._selected_item.board_x, self._selected_item.board_y)]
-                    self._remove_line(self._board[other_x][other_y])
+                    if self._time_pressed < 10:
+                        self._remove_line(self._selected_item)
+                        other_x, other_y = self._point_pairs[(self._selected_item.board_x, self._selected_item.board_y)]
+                        self._remove_line(self._board[other_x][other_y])
                 else:
-                    self._remove_line(self._selected_item.next)
+                    if self._time_pressed < 10:
+                        self._remove_line(self._selected_item)
+                    elif self._selected_item.next and self._selected_item.next.next:
+                        self._remove_line(self._selected_item.next)
                 self._selected_item = None
+                self._time_pressed = 0
             else:
+                self._time_pressed += 1
                 mouse_pos = pygame.mouse.get_pos()
                 board_y = (mouse_pos[0] - self._top_left_x) // ColorConnect.TILE_SIZE
                 board_x = (mouse_pos[1] - self._top_left_y) // ColorConnect.TILE_SIZE
@@ -56,13 +63,15 @@ class ColorConnect:
                     pass
                 elif ColorConnect._are_neighbours(board_x, board_y, self._selected_item.board_x,
                                                   self._selected_item.board_y):
+
+                    if isinstance(self._selected_item, PointConnect):
+                        other_x, other_y = self._point_pairs[
+                            (self._selected_item.board_x, self._selected_item.board_y)]
+                        self._remove_line(self._board[other_x][other_y])
+                    if self._selected_item.next:
+                        self._remove_line(self._selected_item.next)
+
                     if not self._board[board_x][board_y]:
-                        if self._selected_item.next:
-                            self._remove_line(self._selected_item.next)
-                        elif isinstance(self._selected_item, PointConnect):
-                            other_x, other_y = self._point_pairs[
-                                (self._selected_item.board_x, self._selected_item.board_y)]
-                            self._remove_line(self._board[other_x][other_y])
                         new_line = self._create_line_connect(board_x, board_y, self._selected_item.color)
                         self._board[board_x][board_y] = new_line
                         new_line.prev = self._selected_item
@@ -72,7 +81,7 @@ class ColorConnect:
                         if self._board[board_x][board_y] is self._selected_item.prev:
                             self._remove_line(self._selected_item)
                             self._selected_item = self._board[board_x][board_y]
-                        if isinstance(self._board[board_x][board_y], PointConnect) and (
+                        elif isinstance(self._board[board_x][board_y], PointConnect) and (
                                 self._board[board_x][board_y].color == self._selected_item.color):
                             self._board[board_x][board_y].prev = self._selected_item
                             self._selected_item.next = self._board[board_x][board_y]
@@ -124,6 +133,7 @@ class ColorConnect:
         if isinstance(line, PointConnect):
             line_to_go = line.next
             line.next = None
+            line.prev = None
             line = line_to_go
         while line:
             if isinstance(line, PointConnect):

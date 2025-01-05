@@ -3,7 +3,7 @@ from collections import deque
 
 class Solver:
 
-    TIME_LIMIT = 2
+    TIME_LIMIT = 5
 
     def __init__(self, original_state, height):
         self.height = height
