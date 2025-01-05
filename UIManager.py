@@ -6,58 +6,57 @@ import Utils
 class Button:
     def __init__(self, width, height, top_left_x, top_left_y, color, text=None, text_color=None,
                  text_size=None, outline_color=None, outline_width=None):
-        self.top_left_x = top_left_x
-        self.top_left_y = top_left_y
-        self.width = width
-        self.height = height
-
-        self.color = color
-        self.outline_width = outline_width
-        self.outline_color = outline_color
-
-        self.rendered_text = None
-        self.text_rect = None
+        self._top_left_x = top_left_x
+        self._top_left_y = top_left_y
+        self._width = width
+        self._height = height
+        self._color = color
+        self._outline_width = outline_width
+        self._outline_color = outline_color
+        self._rendered_text = None
+        self._text_rect = None
         if text:
-            self.text_color = text_color
-            self.font = pygame.font.Font(None, text_size)
+            self._text_color = text_color
+            self._font = pygame.font.Font(None, text_size)
             self.set_text(text)
-
-        self.on_click = []
-
-    def set_text(self, text):
-        self.rendered_text = self.font.render(text, True, self.text_color)
-        center_x = self.top_left_x + self.width // 2
-        center_y = self.top_left_y + self.height // 2
-        self.text_rect = self.rendered_text.get_rect(center=(center_x, center_y))
+        self._on_click = []
 
     def draw(self, screen):
-        pygame.draw.rect(screen, self.color, pygame.Rect(self.top_left_x, self.top_left_y,
-                                                         self.width, self.height))
-        if self.rendered_text:
-            screen.blit(self.rendered_text, self.text_rect)
-        if self.outline_color:
-            pygame.draw.rect(screen, self.outline_color, pygame.Rect(self.top_left_x, self.top_left_y,
-                                                                     self.width, self.height), self.outline_width)
-
-    def add_on_click(self, func, *args, **kwargs):
-        self.on_click.append((func, args, kwargs))
+        pygame.draw.rect(screen, self._color, pygame.Rect(self._top_left_x, self._top_left_y,
+                                                          self._width, self._height))
+        if self._rendered_text:
+            screen.blit(self._rendered_text, self._text_rect)
+        if self._outline_color:
+            pygame.draw.rect(screen, self._outline_color, pygame.Rect(self._top_left_x, self._top_left_y,
+                                                                      self._width, self._height), self._outline_width)
 
     def check_click(self, mouse_x, mouse_y):
-        if self.top_left_x <= mouse_x <= self.top_left_x + self.width and \
-                self.top_left_y <= mouse_y <= self.top_left_y + self.height:
-            for for_call in self.on_click:
+        if self._top_left_x <= mouse_x <= self._top_left_x + self._width and \
+                self._top_left_y <= mouse_y <= self._top_left_y + self._height:
+            for for_call in self._on_click:
                 for_call[0](*for_call[1], **for_call[2])
+            return True
+        return False
 
     def update(self):
         pass
+
+    def add_on_click(self, func, *args, **kwargs):
+        self._on_click.append((func, args, kwargs))
+
+    def set_text(self, text):
+        self._rendered_text = self._font.render(text, True, self._text_color)
+        center_x = self._top_left_x + self._width // 2
+        center_y = self._top_left_y + self._height // 2
+        self._text_rect = self._rendered_text.get_rect(center=(center_x, center_y))
 
 
 class ColorWheel:
 
     EDGE_POINTS = 100
-    CENTER_RATIO = 1 / 4
-    OUTLINES_WIDTH = 5
-    HIGHLIGHT_TIME = 30
+    CENTER_RATIO = Utils.WHEEL_OF_COLORS_CENTER_RATIO
+    OUTLINES_WIDTH = Utils.WHEEL_OF_COLORS_OUTLINE_WIDTH
+    HIGHLIGHT_TIME = Utils.COLOR_DISPLAY_FRAMES
 
     def __init__(self, color_count, center_x, center_y, radius):
         self._color_count = color_count
@@ -102,7 +101,7 @@ class ColorWheel:
     def check_click(self, mouse_x, mouse_y):
         if (math.hypot(mouse_x - self._center_x, mouse_y - self._center_y) <
                 self._radius * ColorWheel.CENTER_RATIO):
-            return -1
+            return False
 
         angle_step = 2 * math.pi / self._color_count
         click_angle = math.atan2(self._center_y - mouse_y, mouse_x - self._center_x)
@@ -112,10 +111,10 @@ class ColorWheel:
         distance_from_center = math.hypot(mouse_x - self._center_x, mouse_y - self._center_y)
 
         if distance_from_center > self._radius:
-            return -1
+            return False
 
         sector_id = int(click_angle // angle_step)
-        self._highlighted[sector_id] = ColorWheel.HIGHLIGHT_TIME // 3
+        self._highlighted[sector_id] = Utils.CLICK_HIGHLIGHT_FRAMES
         return sector_id
 
     def update(self):
@@ -124,59 +123,22 @@ class ColorWheel:
     def highlight_sector(self, sector_id):
         self._highlighted[sector_id] = ColorWheel.HIGHLIGHT_TIME
 
-    def stop_all_highlight(self):
+    def stop_all_highlights(self):
         self._highlighted.clear()
 
 
 class Flask:
 
-    PART_WIDTH = 55
-    PART_HEIGHT = 60
-    BOTTOM_CORNERS_RADIUS = 22
+    PART_WIDTH = Utils.FLASK_PART_WIDTH
+    PART_HEIGHT = Utils.FLASK_PART_HEIGHT
+    BOTTOM_CORNERS_RADIUS = Utils.FLASK_BOTTOM_CORNERS_RADIUS
+    BONUS_HEIGHT_WHEN_SELECTED = Utils.FLASK_BONUS_HEIGHT_WHEN_SELECTED
 
     def __init__(self, height, bottom_left_x, bottom_left_y):
         self._bottom_left_x = bottom_left_x
         self._bottom_left_y = bottom_left_y
         self._height = height
         self.content = []
-
-    @property
-    def top_color(self):
-        if self.content:
-            return self.content[-1]
-        return -1
-
-    @property
-    def top_count(self):
-        if len(self.content) == 0:
-            return 0
-        i = len(self.content) - 1
-        while i >= 0 and self.content[i] == self.content[-1]:
-            i -= 1
-        return len(self.content) - i - 1
-
-    @property
-    def water_height(self):
-        return len(self.content)
-
-    @property
-    def complete(self):
-        return len(self.content) == self.top_count == self._height or len(self.content) == 0
-
-    def move_top(self):
-        count_ = self.top_count
-        top_elements = self.content[-count_:]
-        self.content = self.content[:-count_]
-        return top_elements
-
-    def receive_top(self, color_stream):
-        self.content.extend(color_stream)
-
-    def select(self):
-        self._bottom_left_y -= 20
-
-    def deselect(self):
-        self._bottom_left_y += 20
 
     def draw(self, screen):
         for i in range(self._height):
@@ -195,35 +157,61 @@ class Flask:
                 pygame.draw.rect(screen, color, rect)
                 pygame.draw.rect(screen, pygame.Color('black'), rect, 2)
 
-    def update(self):
-        pass
-
     def check_click(self, mouse_x, mouse_y):
         return self._bottom_left_x <= mouse_x <= self._bottom_left_x + Flask.PART_WIDTH and (
             self._bottom_left_y - self._height *Flask.PART_HEIGHT <= mouse_y <= self._bottom_left_y)
 
+    def update(self):
+        pass
+
+    def move_top(self):
+        count_ = self._top_count
+        top_elements = self.content[-count_:]
+        self.content = self.content[:-count_]
+        return top_elements
+
+    def receive_top(self, color_stream):
+        self.content.extend(color_stream)
+
+    def select(self):
+        self._bottom_left_y -= Flask.BONUS_HEIGHT_WHEN_SELECTED
+
+    def deselect(self):
+        self._bottom_left_y += Flask.BONUS_HEIGHT_WHEN_SELECTED
+
+    @property
+    def water_height(self):
+        return len(self.content)
+
+    @property
+    def top_color(self):
+        if self.content:
+            return self.content[-1]
+        return -1
+
+    @property
+    def complete(self):
+        return len(self.content) == self._top_count == self._height or len(self.content) == 0
+
+    @property
+    def _top_count(self):
+        if len(self.content) == 0:
+            return 0
+        i = len(self.content) - 1
+        while i >= 0 and self.content[i] == self.content[-1]:
+            i -= 1
+        return len(self.content) - i - 1
+
 
 class LoopPiece:
-    SIDES = 4
-    SIDE_WIDTH = 15
-    SIDE_HEIGHT = 50
-    BORDER_RADIUS = 20
+    SIDE_WIDTH = Utils.LOOP_PIECE_PART_WIDTH
+    SIDE_HEIGHT = Utils.LOOP_PIECE_PART_HEIGHT
+    CIRCLE_RADIUS_TO_WIDTH_PROPORTION = Utils.CIRCLE_RADIUS_TO_WIDTH_PROPORTION
 
     def __init__(self, connections, top_left_x, top_left_y):
-
-        if type(connections) != list or len(connections) != LoopPiece.SIDES:
-            raise ValueError("Piece must take list with 4 elements")
-
-        if any(item != 0 and item != 1 for item in connections):
-            raise ValueError(
-                f"List 'connections' in Piece initialization must contain only values 0 and 1: {connections}")
-
         self._connections = connections
         self._top_left_x = top_left_x
         self._top_left_y = top_left_y
-
-    def __repr__(self):
-        return f"Piece({self._connections})"
 
     def draw(self, screen):
         if self.up:
@@ -244,16 +232,34 @@ class LoopPiece:
             pygame.draw.rect(screen, pygame.Color('black'), rect)
         if sum(self._connections) == 1:
             pygame.draw.circle(screen, pygame.Color('black'), (self._top_left_x + LoopPiece.SIDE_WIDTH // 2,
-                                self._top_left_y + LoopPiece.SIDE_WIDTH // 2), 3 * LoopPiece.SIDE_WIDTH // 2)
+                                self._top_left_y + LoopPiece.SIDE_WIDTH // 2),
+                                LoopPiece.CIRCLE_RADIUS_TO_WIDTH_PROPORTION * LoopPiece.SIDE_WIDTH)
 
     def check_click(self, mouse_x, mouse_y):
         if self._top_left_x - LoopPiece.SIDE_HEIGHT + LoopPiece.SIDE_WIDTH <= mouse_x < (
                 self._top_left_x + LoopPiece.SIDE_HEIGHT) and (self._top_left_y - LoopPiece.SIDE_HEIGHT
                 + LoopPiece.SIDE_WIDTH) <= mouse_y < self._top_left_y + LoopPiece.SIDE_HEIGHT:
             self.rotate()
+            return True
+        return False
 
     def update(self):
         pass
+
+    def rotate(self, times=1):
+        if times % 4 == 1:
+            self._connections[0], self._connections[1], self._connections[2], self._connections[3] = (
+                self.left, self.up, self.right, self.down)
+        elif times % 4 == 2:
+            self._connections[0], self._connections[2] = self.down, self.up
+            self._connections[1], self._connections[3] = self.left, self.right
+        elif times % 4 == 3:
+            self._connections[0], self._connections[1], self._connections[2], self._connections[3] = (
+                self.right, self.down, self.left, self.up)
+
+    @property
+    def state(self):
+        return (self.up << 3) | (self.right << 2) | (self.down << 1) | self.left
 
     @property
     def up(self):
@@ -270,21 +276,6 @@ class LoopPiece:
     @property
     def left(self):
         return self._connections[3]
-
-    @property
-    def state(self):
-        return (self.up << 3) | (self.right << 2) | (self.down << 1) | self.left
-
-    def rotate(self, times=1):
-        if times % 4 == 1:
-            self._connections[0], self._connections[1], self._connections[2], self._connections[3] = (
-                self.left, self.up, self.right, self.down)
-        elif times % 4 == 2:
-            self._connections[0], self._connections[2] = self.down, self.up
-            self._connections[1], self._connections[3] = self.left, self.right
-        elif times % 4 == 3:
-            self._connections[0], self._connections[1], self._connections[2], self._connections[3] = (
-                self.right, self.down, self.left, self.up)
 
 
 class PointConnect:

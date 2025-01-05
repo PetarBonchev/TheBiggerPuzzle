@@ -1,22 +1,23 @@
 import time
 from collections import deque
+import Utils
 
-class Solver:
+class WaterSortSolver:
 
-    TIME_LIMIT = 5
+    TIME_LIMIT = Utils.SOLVER_MAX_SECONDS_FINDING_SOLUTION
 
     def __init__(self, original_state, height):
-        self.height = height
-        self.original_state = original_state
+        self._height = height
+        self._original_state = original_state
 
     def solve(self):
         start_time = time.time()
-        time_limit = Solver.TIME_LIMIT
+        time_limit = WaterSortSolver.TIME_LIMIT
 
         initial_state = []
-        for i in range(len(self.original_state)):
-            additional = [-1] * (self.height - len(self.original_state[i]))
-            initial_state.append(tuple(self.original_state[i] + additional))
+        for i in range(len(self._original_state)):
+            additional = [-1] * (self._height - len(self._original_state[i]))
+            initial_state.append(tuple(self._original_state[i] + additional))
 
         initial_state = tuple(initial_state)
 
@@ -30,12 +31,12 @@ class Solver:
                 print("Time!")
                 return None
 
-            queue_states = deque(sorted(queue_states, key=Solver.calculate_score, reverse=True))
+            queue_states = deque(sorted(queue_states, key=WaterSortSolver._calculate_score, reverse=True))
             current_state = queue_states.popleft()
             if current_state in visited:
                 continue
 
-            if Solver.solved(current_state):
+            if WaterSortSolver._solved(current_state):
                 print(f"Done!: {len(visited)}")
                 print(current_time - start_time)
                 path = []
@@ -49,16 +50,16 @@ class Solver:
             visited.add(current_state)
 
             for i in range(len(current_state)):
-                if Solver.is_row_filled(current_state[i]):
+                if WaterSortSolver._is_row_filled(current_state[i]):
                     continue
 
                 for j in range(len(current_state)):
                     if i == j:
                         continue
-                    if Solver.is_row_filled(current_state[j]) and current_state[j][0] != -1:
+                    if WaterSortSolver._is_row_filled(current_state[j]) and current_state[j][0] != -1:
                         continue
 
-                    moved_state = Solver.move(current_state, i, j)
+                    moved_state = WaterSortSolver._move(current_state, i, j)
                     if moved_state and moved_state not in visited and moved_state not in solution_path:
                         queue_states.append(moved_state)
                         solution_path[moved_state] = current_state
@@ -66,7 +67,7 @@ class Solver:
         return None
 
     @staticmethod
-    def calculate_score(state):
+    def _calculate_score(state):
         score = 0
         for flask in state:
             if flask[0] == -1:
@@ -78,42 +79,33 @@ class Solver:
                         consecutive_count += 1
                     else:
                         if consecutive_count > 1:
-                            score += Solver.calculate_consecutive_score(consecutive_count,
-                                                                        i - consecutive_count == 0)
+                            score += WaterSortSolver._calculate_consecutive_score(consecutive_count,
+                                                                                  i - consecutive_count == 0)
                         consecutive_count = 1
                 if consecutive_count > 1:
-                    score += Solver.calculate_consecutive_score(consecutive_count, True)
+                    score += WaterSortSolver._calculate_consecutive_score(consecutive_count, True)
         return score
 
     @staticmethod
-    def calculate_consecutive_score(count, at_bottom):
-        if count == 2:
-            base_score = 1
-        elif count == 3:
-            base_score = 2
-        elif count == 4:
-            base_score = 4
-        elif count == 5:
-            base_score = 7
+    def _calculate_consecutive_score(count, at_bottom):
+        score = 0
+        if count >= len(Utils.SOLVER_COLOR_COMBO_SCORES):
+            score = Utils.SOLVER_COLOR_COMBO_SCORES[-1]
         else:
-            base_score = 7
+            score = Utils.SOLVER_COLOR_COMBO_SCORES[count]
 
-        return base_score << 1 if at_bottom else base_score
-
-    def set_up(self, list_for_array):
-        additional = [-1] * (self.height - len(list_for_array))
-        return tuple(list_for_array + additional)
+        return score << 1 if at_bottom else score
 
     @staticmethod
-    def is_row_filled(row):
+    def _is_row_filled(row):
         return all(element == row[-1] for element in row)
 
     @staticmethod
-    def solved(game_state):
-        return all(Solver.is_row_filled(row) for row in game_state)
+    def _solved(game_state):
+        return all(WaterSortSolver._is_row_filled(row) for row in game_state)
 
     @staticmethod
-    def can_move(row_from, row_to):
+    def _can_move(row_from, row_to):
         if row_from[0] == -1:
             return False
         if row_to[-1] != -1:
@@ -121,10 +113,10 @@ class Solver:
         if row_to[0] == -1:
             return True
 
-        return Solver.last_filled_element(row_from) == Solver.last_filled_element(row_to)
+        return WaterSortSolver._last_filled_element(row_from) == WaterSortSolver._last_filled_element(row_to)
 
     @staticmethod
-    def last_filled_index(row):
+    def _last_filled_index(row):
         i = 0
         while i < len(row) and row[i] != -1:
             i += 1
@@ -133,23 +125,23 @@ class Solver:
         return i
 
     @staticmethod
-    def last_filled_element(row):
-        return row[Solver.last_filled_index(row)]
+    def _last_filled_element(row):
+        return row[WaterSortSolver._last_filled_index(row)]
 
     @staticmethod
-    def move(current_state, from_idx, to_idx):
+    def _move(current_state, from_idx, to_idx):
         row_from = current_state[from_idx]
         row_to = current_state[to_idx]
 
-        if not Solver.can_move(row_from, row_to):
+        if not WaterSortSolver._can_move(row_from, row_to):
             return None
 
         state_list = list(current_state)
         row_from = list(row_from)
         row_to = list(row_to)
 
-        i = Solver.last_filled_index(row_from)
-        j = Solver.last_filled_index(row_to)
+        i = WaterSortSolver._last_filled_index(row_from)
+        j = WaterSortSolver._last_filled_index(row_to)
         if row_to[j] != -1:
             j += 1
 

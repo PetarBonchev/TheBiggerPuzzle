@@ -7,13 +7,13 @@ clock = pygame.time.Clock()
 
 windows = WindowManager()
 
-while Utils.running:
+while Utils.game_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            Utils.running = False
+            Utils.game_running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                Utils.running = False
+                Utils.game_running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 windows.check_click(*event.pos)

@@ -1,5 +1,4 @@
 import pygame
-
 import ColorConnectGenerator
 import Utils
 from UIManager import PointConnect, LineConnect
@@ -7,14 +6,15 @@ from UIManager import PointConnect, LineConnect
 
 class ColorConnect:
 
-    TILE_SIZE = 70
-    POINT_RADIUS = 30
+    TILE_SIZE = Utils.COLOR_CONNECT_TILE_SIZE
+    POINT_RADIUS = Utils.COLOR_CONNECT_TILE_SIZE * Utils.POINT_RADIUS_PROPORTION_TO_TILE_SIZE
+    CLICK_TIME_LIMIT = Utils.CLICK_HOLD_TIME_THRESHOLD
 
     def __init__(self, width, height, color_count):
         self._width = width
         self._height = height
         self._color_count = color_count
-        self._generator = ColorConnectGenerator.TableGenerator(width, height, color_count)
+        self._generator = ColorConnectGenerator.ColorTableGenerator(width, height, color_count)
         self._top_left_x = (Utils.screen_width - self._width * ColorConnect.TILE_SIZE) // 2
         self._top_left_y = (Utils.screen_height - self._height * ColorConnect.TILE_SIZE) // 2
         self._board = [[None for _ in range(self._width)] for _ in range(self._height)]
@@ -22,7 +22,7 @@ class ColorConnect:
         self._selected_item = None
         self._time_pressed = 0
 
-        self.generate()
+        self.new_game()
 
     def draw(self, screen):
         self._draw_grid(screen)
@@ -43,12 +43,12 @@ class ColorConnect:
         if self._selected_item:
             if not pygame.mouse.get_pressed()[0]:
                 if isinstance(self._selected_item, PointConnect):
-                    if self._time_pressed < 10:
+                    if self._time_pressed < ColorConnect.CLICK_TIME_LIMIT:
                         self._remove_line(self._selected_item)
                         other_x, other_y = self._point_pairs[(self._selected_item.board_x, self._selected_item.board_y)]
                         self._remove_line(self._board[other_x][other_y])
                 else:
-                    if self._time_pressed < 10:
+                    if self._time_pressed < ColorConnect.CLICK_TIME_LIMIT:
                         self._remove_line(self._selected_item)
                     elif self._selected_item.next and self._selected_item.next.next:
                         self._remove_line(self._selected_item.next)
@@ -86,9 +86,9 @@ class ColorConnect:
                             self._board[board_x][board_y].prev = self._selected_item
                             self._selected_item.next = self._board[board_x][board_y]
             if self._is_board_solved():
-                self.generate()
+                self.new_game()
 
-    def generate(self):
+    def new_game(self):
         self._board = [[None for _ in range(self._width)] for _ in range(self._height)]
         self._selected_item = None
         self._point_pairs = {}

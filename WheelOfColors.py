@@ -2,21 +2,23 @@ import Utils
 from UIManager import ColorWheel
 from random import randint
 
-class WheelGame:
+class WheelOfColors:
 
-    WHEEL_RADIUS = 350
-    COLOR_DISPLAY_TIME = Utils.WOC_COLOR_DISPLAY_TIME
+    WHEEL_RADIUS = Utils.WHEEL_OF_COLORS_RADIUS
+    COLOR_DISPLAY_TIME = Utils.COLOR_DISPLAY_FRAMES
 
     def __init__(self, color_count, score_text):
         self._color_count = color_count
         self._color_wheel = ColorWheel(color_count, Utils.screen_width // 2,
-                                       Utils.screen_height // 2, WheelGame.WHEEL_RADIUS)
+                                       Utils.screen_height // 2, WheelOfColors.WHEEL_RADIUS)
         self._score_text = score_text
         self._pattern = []
         self._game_state = 1
         self._timer = 0
         self._displayed_color = 0
         self._color_to_receive = 0
+
+        self.new_game()
 
     def draw(self, screen):
         self._color_wheel.draw(screen)
@@ -47,19 +49,19 @@ class WheelGame:
         elif self._game_state == 4:
             pass
         elif self._game_state == -1:
-            self._color_wheel.stop_all_highlight()
+            self._color_wheel.stop_all_highlights()
             for i in range(self._color_count):
                 self._color_wheel.highlight_sector(i)
             self._score_text.set_text(f"Game over! Final score: {len(self._pattern) - 1}")
             self._game_state = -2
 
-    def restart(self):
+    def new_game(self):
         self._pattern = []
         self._game_state = 1
         self._timer = 0
         self._color_to_receive = 0
         self._displayed_color = 0
-        self._color_wheel.stop_all_highlight()
+        self._color_wheel.stop_all_highlights()
         self._score_text.set_text("Score: 0")
 
     def _pick_color(self):
@@ -71,7 +73,7 @@ class WheelGame:
             self._displayed_color = 0
             return 4
         self._color_wheel.highlight_sector(self._pattern[self._displayed_color])
-        self._timer = WheelGame.COLOR_DISPLAY_TIME
+        self._timer = WheelOfColors.COLOR_DISPLAY_TIME
         return 3
 
     def _receive_color(self, color_id):
@@ -83,6 +85,6 @@ class WheelGame:
                 self._score_text.set_text(f'Score: {len(self._pattern)}')
                 self._color_to_receive = 0
                 self._game_state = 1
-                self._timer = WheelGame.COLOR_DISPLAY_TIME
+                self._timer = WheelOfColors.COLOR_DISPLAY_TIME
         else:
             self._game_state = -1
