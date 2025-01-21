@@ -2,6 +2,7 @@ import pygame
 import Utils
 from ColorConnect import ColorConnect
 from InfinityLoop import InfinityLoop
+from LevelSelector import LevelSelector
 from UIManager import Button
 from WaterSort import WaterSort
 from WheelOfColors import WheelOfColors
@@ -29,11 +30,20 @@ class Window:
         for game_object in self._game_objects:
             game_object.check_click(mouse_x, mouse_y)
 
+    def find_by_class_type(self, class_type):
+        for obj in self._game_objects:
+            if isinstance(obj, class_type):
+                return obj
+
+    def remove_game_object(self, class_type):
+        self._game_objects = [obj for obj in self._game_objects if not isinstance(obj, class_type)]
+
 
 class WindowDefiner:
 
     @staticmethod
     def fill_window_manager():
+        WindowManager.instance.add_window(WindowDefiner.define_level_window())
         WindowManager.instance.add_window(WindowDefiner.define_main_window())
         WindowManager.instance.add_window(WindowDefiner.define_wheel_of_colors_window())
         WindowManager.instance.add_window(WindowDefiner.define_water_sort_window())
@@ -48,6 +58,8 @@ class WindowDefiner:
                        pygame.Color('yellow'), "The Bigger Puzzle",
                         pygame.Color('red'), 100, pygame.Color('purple'), 5)
 
+        level_ref = WindowManager.instance.find_object_by_class_type(LevelSelector)
+
         def stop_running():
             Utils.game_running = False
         quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
@@ -57,22 +69,26 @@ class WindowDefiner:
         wheel_of_colors = Button(325, 325, Utils.screen_width / 2 - 325, 180,
                                  pygame.Color('green'), "Wheel of _colors", pygame.Color('black'), 25,
                                  pygame.Color('purple'), 10)
-        wheel_of_colors.add_on_click(WindowManager.instance.go_to_window, 1)
+        wheel_of_colors.add_on_click(WindowManager.instance.go_to_window, 0)
+        wheel_of_colors.add_on_click(level_ref.load_levels, 'wheel_of_colors_data.txt')
 
         flow_free = Button(325, 325, Utils.screen_width / 2 , 180,
                                  pygame.Color('green'), "Flow free", pygame.Color('black'), 25,
                                  pygame.Color('purple'), 10)
-        flow_free.add_on_click(WindowManager.instance.go_to_window, 4)
+        flow_free.add_on_click(WindowManager.instance.go_to_window, 0)
+        flow_free.add_on_click(level_ref.load_levels, 'color_connect_data.txt')
 
         infinity_loop = Button(325, 325, Utils.screen_width / 2 - 325, 505,
                                  pygame.Color('green'), "Infinity loop", pygame.Color('black'), 25,
                                  pygame.Color('purple'), 10)
-        infinity_loop.add_on_click(WindowManager.instance.go_to_window, 3)
+        infinity_loop.add_on_click(WindowManager.instance.go_to_window, 0)
+        infinity_loop.add_on_click(level_ref.load_levels, 'infinity_loop_data.txt')
 
         water_sort = Button(325, 325, Utils.screen_width / 2 , 505,
                                  pygame.Color('green'), "Water sort", pygame.Color('black'), 25,
                                  pygame.Color('purple'), 10)
-        water_sort.add_on_click(WindowManager.instance.go_to_window, 2)
+        water_sort.add_on_click(WindowManager.instance.go_to_window, 0)
+        water_sort.add_on_click(level_ref.load_levels, 'water_sort_data.txt')
 
         window.add_game_object(title)
         window.add_game_object(quit_button)
@@ -87,14 +103,11 @@ class WindowDefiner:
     def define_wheel_of_colors_window():
         window = Window(pygame.Color('grey'))
 
-        score_text = Button(600, 100, Utils.screen_width // 2 - 300, 10, pygame.Color('Green'),
-                            'Score: 0', pygame.Color('black'), 50, pygame.Color('black'), 2)
-
-        wheel_game = WheelOfColors(4, score_text)
+        wheel_game = WheelOfColors(4, [1,1])
 
         quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
                              "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
-        quit_button.add_on_click(WindowManager.instance.go_to_window, 0)
+        quit_button.add_on_click(WindowManager.instance.go_to_window, 1)
 
         restart_button = Button(50, 50, 70, 10, pygame.Color('orange'),
                              "o", pygame.Color('black'), 50, pygame.Color('black'), 2)
@@ -110,11 +123,11 @@ class WindowDefiner:
     def define_water_sort_window():
         window = Window(pygame.Color('grey'))
 
-        water_sort = WaterSort(5, 8)
+        water_sort = WaterSort(2,5,[1,2,1,2])
 
         quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
                              "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
-        quit_button.add_on_click(WindowManager.instance.go_to_window, 0)
+        quit_button.add_on_click(WindowManager.instance.go_to_window, 1)
 
         restart_button = Button(50, 50, 70, 10, pygame.Color('orange'),
                                 "o", pygame.Color('black'), 50, pygame.Color('black'), 2)
@@ -135,10 +148,10 @@ class WindowDefiner:
     def define_infinity_loop_window():
         window = Window(pygame.Color('grey'))
 
-        board = InfinityLoop(5, 8)
+        board = InfinityLoop(5, 8 )
         quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
                              "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
-        quit_button.add_on_click(WindowManager.instance.go_to_window, 0)
+        quit_button.add_on_click(WindowManager.instance.go_to_window, 1)
         restart_button = Button(50, 50, 70, 10, pygame.Color('orange'),
                                 "o", pygame.Color('black'), 50, pygame.Color('black'), 2)
         restart_button.add_on_click(board.new_game)
@@ -156,7 +169,7 @@ class WindowDefiner:
         grid = ColorConnect(6, 8, 6)
         quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
                              "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
-        quit_button.add_on_click(WindowManager.instance.go_to_window, 0)
+        quit_button.add_on_click(WindowManager.instance.go_to_window, 1)
         restart_button = Button(50, 50, 70, 10, pygame.Color('orange'),
                                 "o", pygame.Color('black'), 50, pygame.Color('black'), 2)
         restart_button.add_on_click(grid.new_game)
@@ -164,6 +177,21 @@ class WindowDefiner:
         window.add_game_object(quit_button)
         window.add_game_object(restart_button)
         window.add_game_object(grid)
+
+        return window
+
+    @staticmethod
+    def define_level_window():
+        window = Window(pygame.Color('grey'))
+
+        levels = LevelSelector(WindowManager.instance)
+
+        quit_button = Button(50, 50, 10, 10, pygame.Color('red'),
+                             "X", pygame.Color('black'), 50, pygame.Color('black'), 2)
+        quit_button.add_on_click(WindowManager.instance.go_to_window, 1)
+
+        window.add_game_object(quit_button)
+        window.add_game_object(levels)
 
         return window
 
@@ -183,7 +211,7 @@ class WindowManager:
         Utils.screen_height = info.current_h
         self._screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN | pygame.SCALED)
 
-        self._current_window = 0
+        self._current_window = 1
         self._windows = []
 
         WindowDefiner.fill_window_manager()
@@ -211,3 +239,15 @@ class WindowManager:
             return
 
         self._windows[self._current_window].check_click(mouse_x, mouse_y)
+
+    def find_object_by_class_type(self, class_type):
+        for window in self._windows:
+            obj = window.find_by_class_type(class_type)
+            if obj:
+                return obj
+
+    def remove_object_from_window(self, class_type, window_number):
+        self._windows[window_number].remove_game_object(class_type)
+
+    def add_object_in_window(self, obj, window_number):
+        self._windows[window_number].add_game_object(obj)

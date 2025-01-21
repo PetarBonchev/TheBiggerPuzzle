@@ -9,7 +9,7 @@ class WaterSort:
     EMPTY_FLASKS = Utils.WATER_SORT_EMPTY_FLASKS
     SPACE_BETWEEN_FLASKS = Utils.WATER_SORT_SPACE_BETWEEN_FLASKS
 
-    def __init__(self, height, flask_count):
+    def __init__(self, height, flask_count, game_data = None):
         self._flask_count = flask_count
         self._height = height
         self._flasks = []
@@ -17,6 +17,7 @@ class WaterSort:
         self._game_state = 0
         self._selected_flask_id = -1
         self._actions = []
+        self._game_data = game_data
 
         self.new_game()
 
@@ -92,8 +93,11 @@ class WaterSort:
     def _random_fill(self):
         self._flasks.clear()
         self._initialize_flasks()
-        water_mix = [i for i in range(self._flask_count - WaterSort.EMPTY_FLASKS) for _ in range(self._height)]
-        random.shuffle(water_mix)
+        if self._game_data:
+            water_mix = self._game_data
+        else:
+            water_mix = [i for i in range(self._flask_count - WaterSort.EMPTY_FLASKS) for _ in range(self._height)]
+            random.shuffle(water_mix)
         for i in range(self._flask_count - WaterSort.EMPTY_FLASKS):
             self._flasks[i].receive_top(water_mix[i * self._height: (i + 1) * self._height])
 

@@ -10,7 +10,7 @@ class ColorConnect:
     POINT_RADIUS = Utils.COLOR_CONNECT_TILE_SIZE * Utils.POINT_RADIUS_PROPORTION_TO_TILE_SIZE
     CLICK_TIME_LIMIT = Utils.CLICK_HOLD_TIME_THRESHOLD
 
-    def __init__(self, width, height, color_count):
+    def __init__(self, width, height, color_count, game_data = None):
         self._width = width
         self._height = height
         self._color_count = color_count
@@ -21,6 +21,7 @@ class ColorConnect:
         self._point_pairs = {}
         self._selected_item = None
         self._time_pressed = 0
+        self._game_data = game_data
 
         self.new_game()
 
@@ -92,7 +93,10 @@ class ColorConnect:
         self._board = [[None for _ in range(self._width)] for _ in range(self._height)]
         self._selected_item = None
         self._point_pairs = {}
-        trails = self._generator.generate()
+        if self._game_data:
+            trails = self._game_data
+        else:
+            trails = self._generator.generate()
 
         color_id = 0
         for trail in trails:
