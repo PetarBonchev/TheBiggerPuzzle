@@ -4,6 +4,7 @@ import GlobalVariables
 from AnchorCalculator import Anchor
 from GameObject import GameObject
 from ColorWheelUI import ColorWheel
+from LevelSystem import LevelSystem
 from Text import Text
 from Button import Button
 
@@ -12,6 +13,7 @@ class WheelOfColors(GameObject):
         super().__init__(name)
         self._color_count = color_count
         self._game_data = game_data
+        self._level_id = -1
         self._radius = GlobalVariables.screen_height * GlobalVariables.WOC_RADIUS_TO_HEIGHT_RATIO
         color_wheel = ColorWheel(self._color_count, *Anchor.center(0, 0, 0, 0), self._radius, name='color_wheel')
         score_text = Text(*Anchor.top_middle(0, 40, 0), 'Score: 0', pygame.Color('black'), 50, 'score_text')
@@ -37,9 +39,10 @@ class WheelOfColors(GameObject):
             self._color_count = randint(2, 10)
         self.get_object_by_name('color_wheel').reset(self._color_count)
 
-    def reset(self, color_count=-1, game_data=None):
+    def reset(self, color_count=-1, game_data=None, level_id=-1):
         self._color_count = color_count
         self._game_data = game_data
+        self._level_id = level_id
         self.new_game()
 
     def _draw(self, screen):
@@ -84,6 +87,7 @@ class WheelOfColors(GameObject):
             if self._color_to_receive >= len(self._pattern):
                 if self._game_data and len(self._game_data) == len(self._pattern):
                     self.get_object_by_name('score_text').set_text("You win!")
+                    LevelSystem.complete_level(GlobalVariables.WHEEL_OF_COLORS_GAME_ID, self._level_id)
                     self._game_state = 'game_ended'
                 else:
                     self.get_object_by_name('score_text').set_text(f"Score: {len(self._pattern)}")

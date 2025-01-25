@@ -7,6 +7,7 @@ from FlaskUI import Flask
 from GameObject import GameObject
 from AnchorCalculator import Anchor
 from Button import Button
+from LevelSystem import LevelSystem
 from Text import Text
 
 
@@ -21,6 +22,7 @@ class WaterSort(GameObject):
         self._flasks = []
         self._game_data = game_data
         self._set_game = False
+        self._level_id = -1
         self._initialize_flasks()
         self._game_state = 'new_game'
         self._selected_flask_id = -1
@@ -51,7 +53,8 @@ class WaterSort(GameObject):
         if not self._set_game and (not self._find_solution() or self._is_game_complete()):
             self.reset()
 
-    def reset(self, height=-1, flask_count=-1, game_data=None):
+    def reset(self, height=-1, flask_count=-1, game_data=None, level_number=-1):
+        self._level_id = level_number
         if not self._set_game:
             self._height = random.randint(3, 6)
             self._flask_count = random.randint(4, 10)
@@ -63,7 +66,7 @@ class WaterSort(GameObject):
             if game_data:
                 self.new_game(game_data)
             else:
-                self.new_game(copy.deepcopy(self._game_data))
+                self.new_game(self._game_data)
 
     def undo(self):
         if len(self._actions) > 1:
@@ -91,7 +94,8 @@ class WaterSort(GameObject):
             self.reset()
         elif self._game_state == 'complete':
             if self._set_game:
-                self.get_object_by_name('score_text').set_text('You won!')
+                self.get_object_by_name('score_text').set_text('You win!')
+                LevelSystem.complete_level(GlobalVariables.WATER_SORT_GAME_ID, self._level_id)
             else:
                 self.reset()
 

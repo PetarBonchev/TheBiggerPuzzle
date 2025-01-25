@@ -4,6 +4,7 @@ import copy
 import GlobalVariables
 from AnchorCalculator import Anchor
 from GameObject import GameObject
+from LevelSystem import LevelSystem
 from LoopPieceUI import LoopPiece
 from Button import Button
 from Text import Text
@@ -24,6 +25,7 @@ class InfinityLoop(GameObject):
                                 self._part_width, self._width * self._piece_length, self._height * self._piece_length)
         self._game_data = game_data
         self._set_game = False
+        self._level_id = -1
         restart_button = Button(80, 50, *Anchor.top_left(70, 10), pygame.Color('orange'), text="Restart",
                                 name='restart_button')
         restart_button.add_on_click(self.reset, game_data=self._game_data)
@@ -65,7 +67,7 @@ class InfinityLoop(GameObject):
                     self._piece_board[x][y] = piece
                     self.add_child(piece)
 
-    def reset(self, width=-1, height=-1, game_data=None):
+    def reset(self, width=-1, height=-1, game_data=None, level_number=-1):
 
         if not self._set_game:
             if width == height == -1:
@@ -75,7 +77,14 @@ class InfinityLoop(GameObject):
                 self._width = width
                 self._height = height
             self._game_data = game_data
+        else:
+            if width != -1 and height != -1:
+                self._width = width
+                self._height = height
+            if game_data:
+                self._game_data = game_data
 
+        self._level_id = level_number
         self._top_left_x, self._top_left_y = Anchor.center(self._part_height - self._part_width, self._part_height -
                                                            self._part_width, self._width * self._piece_length,
                                                            self._height * self._piece_length)
@@ -90,6 +99,7 @@ class InfinityLoop(GameObject):
         if self._is_solved():
             if self._set_game:
                 self.get_object_by_name('score_text').set_text('You win!')
+                LevelSystem.complete_level(GlobalVariables.INFINITY_LOOP_GAME_ID, self._level_id)
             else:
                 self.reset()
 
