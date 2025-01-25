@@ -1,31 +1,43 @@
+import random
 import pygame
 import ColorConnectGenerator
-import Utils
-from UIManager import PointConnect, LineConnect
+import GlobalVariables
+from AnchorCalculator import Anchor
+from GameObject import GameObject
+from PointConnectUi import PointConnect
+from LineConnectUI import LineConnect
+from Button import Button
+from Text import Text
 
 
-class ColorConnect:
+class ColorConnect(GameObject):
 
-    TILE_SIZE = Utils.COLOR_CONNECT_TILE_SIZE
-    POINT_RADIUS = Utils.COLOR_CONNECT_TILE_SIZE * Utils.POINT_RADIUS_PROPORTION_TO_TILE_SIZE
-    CLICK_TIME_LIMIT = Utils.CLICK_HOLD_TIME_THRESHOLD
+    POINT_RADIUS = GlobalVariables.CC_TILE_SIZE * 3 / 7
 
-    def __init__(self, width, height, color_count, game_data = None):
+    def __init__(self, width, height, color_count, game_data=None, name='color_connect'):
+        super().__init__(name)
         self._width = width
         self._height = height
         self._color_count = color_count
         self._generator = ColorConnectGenerator.ColorTableGenerator(width, height, color_count)
-        self._top_left_x = (Utils.screen_width - self._width * ColorConnect.TILE_SIZE) // 2
-        self._top_left_y = (Utils.screen_height - self._height * ColorConnect.TILE_SIZE) // 2
+        self._top_left_x, self._top_left_y = Anchor.center(0, 0,
+            self._width * GlobalVariables.CC_TILE_SIZE, self._height * GlobalVariables.CC_TILE_SIZE)
         self._board = [[None for _ in range(self._width)] for _ in range(self._height)]
         self._point_pairs = {}
         self._selected_item = None
         self._time_pressed = 0
         self._game_data = game_data
+        self._set_game = False
+        restart_button = Button(80, 50, *Anchor.top_left(70, 10), pygame.Color('orange'), text="Restart",
+                                name='restart_button')
+        restart_button.add_on_click(self.reset)
+        message_text = Text(*Anchor.top_middle(0, 40, 0), '', pygame.Color('black'), 50, 'score_text')
 
-        self.new_game()
+        self.add_child(message_text)
+        self.add_child(restart_button)
+        self.reset()
 
-    def draw(self, screen):
+    def _draw(self, screen):
         self._draw_grid(screen)
 
         for row in self._board:
@@ -33,23 +45,23 @@ class ColorConnect:
                 if item:
                     item.draw(screen)
 
-    def check_click(self, mouse_x, mouse_y):
+    def _check_click(self, mouse_x, mouse_y):
         for row in self._board:
             for item in row:
                 if item:
                     if item.check_click(mouse_x, mouse_y):
                         self._selected_item = item
 
-    def update(self):
+    def _update(self):
         if self._selected_item:
             if not pygame.mouse.get_pressed()[0]:
                 if isinstance(self._selected_item, PointConnect):
-                    if self._time_pressed < ColorConnect.CLICK_TIME_LIMIT:
+                    if self._time_pressed < GlobalVariables.CLICK_HOLD_FRAMES_THRESHOLD:
                         self._remove_line(self._selected_item)
                         other_x, other_y = self._point_pairs[(self._selected_item.board_x, self._selected_item.board_y)]
                         self._remove_line(self._board[other_x][other_y])
                 else:
-                    if self._time_pressed < ColorConnect.CLICK_TIME_LIMIT:
+                    if self._time_pressed < GlobalVariables.CLICK_HOLD_FRAMES_THRESHOLD:
                         self._remove_line(self._selected_item)
                     elif self._selected_item.next and self._selected_item.next.next:
                         self._remove_line(self._selected_item.next)
@@ -58,8 +70,8 @@ class ColorConnect:
             else:
                 self._time_pressed += 1
                 mouse_pos = pygame.mouse.get_pos()
-                board_y = (mouse_pos[0] - self._top_left_x) // ColorConnect.TILE_SIZE
-                board_x = (mouse_pos[1] - self._top_left_y) // ColorConnect.TILE_SIZE
+                board_y = (mouse_pos[0] - self._top_left_x) // GlobalVariables.CC_TILE_SIZE
+                board_x = (mouse_pos[1] - self._top_left_y) // GlobalVariables.CC_TILE_SIZE
                 if board_x < 0 or board_y < 0 or board_x >= self._height or board_y >= self._width:
                     pass
                 elif ColorConnect._are_neighbours(board_x, board_y, self._selected_item.board_x,
@@ -87,21 +99,28 @@ class ColorConnect:
                             self._board[board_x][board_y].prev = self._selected_item
                             self._selected_item.next = self._board[board_x][board_y]
             if self._is_board_solved():
-                self.new_game()
+                if self._set_game:
+                    self.get_object_by_name('score_text').set_text('You win!')
+                else:
+                    self.reset()
 
     def new_game(self):
         self._board = [[None for _ in range(self._width)] for _ in range(self._height)]
         self._selected_item = None
         self._point_pairs = {}
+        self._top_left_x, self._top_left_y = Anchor.center(0, 0,
+            self._width * GlobalVariables.CC_TILE_SIZE, self._height * GlobalVariables.CC_TILE_SIZE)
+        self.get_object_by_name('score_text').set_text('')
         if self._game_data:
             trails = self._game_data
         else:
+            self._generator = ColorConnectGenerator.ColorTableGenerator(self._width, self._height, self._color_count)
             trails = self._generator.generate()
 
         color_id = 0
         for trail in trails:
-            point_1 = self._create_point_connect(trail[0][0], trail[0][1], Utils.COLORS[color_id % len(Utils.COLORS)])
-            point_2 =  self._create_point_connect(trail[-1][0], trail[-1][1], Utils.COLORS[color_id % len(Utils.COLORS)])
+            point_1 = self._create_point_connect(trail[0][0], trail[0][1], GlobalVariables.COLORS[color_id % len(GlobalVariables.COLORS)])
+            point_2 = self._create_point_connect(trail[-1][0], trail[-1][1], GlobalVariables.COLORS[color_id % len(GlobalVariables.COLORS)])
 
             self._board[trail[0][0]][trail[0][1]] = point_1
             self._board[trail[-1][0]][trail[-1][1]] = point_2
@@ -111,27 +130,51 @@ class ColorConnect:
 
             color_id += 1
 
+    def reset(self, width=-1, height=-1, color_count=-1, game_data=None):
+        if self._set_game:
+            if game_data:
+                self._width = width
+                self._height = height
+                self._color_count = color_count
+                self._game_data = game_data
+            self.new_game()
+            return
+
+        if width == height == -1:
+            self._width = random.randint(4, 16)
+            self._height = random.randint(4, 10)
+            self._color_count = max(3, min(12, self._width * self._height // 9))
+        else:
+            self._width = width
+            self._height = height
+            self._color_count = color_count
+        self._game_data = game_data
+        self.new_game()
+
+    def change_game_mode(self, is_set_game):
+        self._set_game = is_set_game
+
     def _draw_grid(self, screen):
         for i in range(self._height + 1):
             pygame.draw.line(screen, pygame.Color('black'), (self._top_left_x, self._top_left_y +
-                                                             i * ColorConnect.TILE_SIZE),
-                             (self._top_left_x + self._width * ColorConnect.TILE_SIZE,
-                              self._top_left_y + i * ColorConnect.TILE_SIZE))
+                                                             i * GlobalVariables.CC_TILE_SIZE),
+                             (self._top_left_x + self._width * GlobalVariables.CC_TILE_SIZE,
+                              self._top_left_y + i * GlobalVariables.CC_TILE_SIZE))
         for i in range(self._width + 1):
-            pygame.draw.line(screen, pygame.Color('black'), (self._top_left_x + i * ColorConnect.TILE_SIZE,
+            pygame.draw.line(screen, pygame.Color('black'), (self._top_left_x + i * GlobalVariables.CC_TILE_SIZE,
                                                              self._top_left_y),
-                             (self._top_left_x + i * ColorConnect.TILE_SIZE,
-                              self._top_left_y + self._height * ColorConnect.TILE_SIZE))
+                             (self._top_left_x + i * GlobalVariables.CC_TILE_SIZE,
+                              self._top_left_y + self._height * GlobalVariables.CC_TILE_SIZE))
 
     def _create_point_connect(self, x, y, color):
-        return PointConnect(self._top_left_x + y * ColorConnect.TILE_SIZE + ColorConnect.TILE_SIZE // 2,
-                            self._top_left_y + x * ColorConnect.TILE_SIZE + ColorConnect.TILE_SIZE // 2,
-                            ColorConnect.POINT_RADIUS, color, ColorConnect.TILE_SIZE, x, y)
+        return PointConnect(self._top_left_x + y * GlobalVariables.CC_TILE_SIZE + GlobalVariables.CC_TILE_SIZE // 2,
+                            self._top_left_y + x * GlobalVariables.CC_TILE_SIZE + GlobalVariables.CC_TILE_SIZE // 2,
+                            ColorConnect.POINT_RADIUS, color, GlobalVariables.CC_TILE_SIZE, x, y)
 
     def _create_line_connect(self, x, y, color):
-        return LineConnect(self._top_left_x + y * ColorConnect.TILE_SIZE + ColorConnect.TILE_SIZE // 2,
-                            self._top_left_y + x * ColorConnect.TILE_SIZE + ColorConnect.TILE_SIZE // 2,
-                            color, ColorConnect.TILE_SIZE, x, y)
+        return LineConnect(self._top_left_x + y * GlobalVariables.CC_TILE_SIZE + GlobalVariables.CC_TILE_SIZE // 2,
+                            self._top_left_y + x * GlobalVariables.CC_TILE_SIZE + GlobalVariables.CC_TILE_SIZE // 2,
+                            color, GlobalVariables.CC_TILE_SIZE, x, y)
 
     def _remove_line(self, line):
         if isinstance(line, PointConnect):

@@ -1,10 +1,11 @@
 import time
 from collections import deque
-import Utils
+import GlobalVariables
+
 
 class WaterSortSolver:
 
-    TIME_LIMIT = Utils.SOLVER_MAX_SECONDS_FINDING_SOLUTION
+    COMBO_SCORES = (0, 0, 1, 2, 4, 7)
 
     def __init__(self, original_state, height):
         self._height = height
@@ -12,7 +13,7 @@ class WaterSortSolver:
 
     def solve(self):
         start_time = time.time()
-        time_limit = WaterSortSolver.TIME_LIMIT
+        time_limit = GlobalVariables.WS_SOLVER_TIME_LIMIT
 
         initial_state = []
         for i in range(len(self._original_state)):
@@ -28,7 +29,7 @@ class WaterSortSolver:
         while len(queue_states):
             current_time = time.time()
             if current_time - start_time > time_limit:
-                print("Time!")
+                #print("Time!")
                 return None
 
             queue_states = deque(sorted(queue_states, key=WaterSortSolver._calculate_score, reverse=True))
@@ -37,8 +38,8 @@ class WaterSortSolver:
                 continue
 
             if WaterSortSolver._solved(current_state):
-                print(f"Done!: {len(visited)}")
-                print(current_time - start_time)
+                #print(f"Done!: {len(visited)}")
+                #print(current_time - start_time)
                 path = []
                 while current_state in solution_path:
                     path.append(current_state)
@@ -89,10 +90,10 @@ class WaterSortSolver:
     @staticmethod
     def _calculate_consecutive_score(count, at_bottom):
         score = 0
-        if count >= len(Utils.SOLVER_COLOR_COMBO_SCORES):
-            score = Utils.SOLVER_COLOR_COMBO_SCORES[-1]
+        if count >= len(WaterSortSolver.COMBO_SCORES):
+            score = WaterSortSolver.COMBO_SCORES[-1]
         else:
-            score = Utils.SOLVER_COLOR_COMBO_SCORES[count]
+            score = WaterSortSolver.COMBO_SCORES[count]
 
         return score << 1 if at_bottom else score
 

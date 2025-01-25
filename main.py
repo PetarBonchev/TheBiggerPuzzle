@@ -1,25 +1,36 @@
 import pygame
+
+import GlobalVariables
 from WindowManager import WindowManager
-import Utils
+from WindowContentFiller import WindowContentFiller
+import AnchorCalculator
 
 pygame.init()
 clock = pygame.time.Clock()
 
-windows = WindowManager()
+info = pygame.display.Info()
+GlobalVariables.screen_width = info.current_w
+GlobalVariables.screen_height = info.current_h
+AnchorCalculator.screen_width = info.current_w
+AnchorCalculator.screen_height = info.current_h
 
-while Utils.game_running:
+screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN | pygame.SCALED)
+window_system = WindowManager()
+WindowContentFiller.define_window_manager_windows(window_system)
+
+while GlobalVariables.game_running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            Utils.game_running = False
+            GlobalVariables.game_running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                Utils.game_running = False
+                GlobalVariables.game_running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                windows.check_click(*event.pos)
+                window_system.check_click(*event.pos)
 
-    windows.update()
-    windows.draw()
+    window_system.update()
+    window_system.draw(screen)
 
     pygame.display.flip()
 

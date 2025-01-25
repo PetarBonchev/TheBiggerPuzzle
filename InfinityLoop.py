@@ -1,45 +1,42 @@
 import random
-import Utils
-from UIManager import LoopPiece
+import pygame
 import copy
+import GlobalVariables
+from AnchorCalculator import Anchor
+from GameObject import GameObject
+from LoopPieceUI import LoopPiece
+from Button import Button
+from Text import Text
 
 
-class InfinityLoop:
+class InfinityLoop(GameObject):
 
-    SIDE_WIDTH = Utils.LOOP_PIECE_PART_WIDTH
-    SIDE_HEIGHT = Utils.LOOP_PIECE_PART_HEIGHT
-
-    def __init__(self, width, height, game_data = None):
+    def __init__(self, width, height, game_data=None, name='infinity_loop'):
+        super().__init__(name)
         self._height = height
         self._width = width
+        self._part_width = GlobalVariables.IL_PIECE_WIDTH
+        self._part_height = GlobalVariables.IL_PIECE_HEIGHT
         self._board = [[0 for _ in range(width)] for _ in range(height)]
         self._piece_board = [[None for _ in range(width)] for _ in range(height)]
-        self._piece_length = 2 * InfinityLoop.SIDE_HEIGHT - InfinityLoop.SIDE_WIDTH
-        self._top_left_x = (Utils.screen_width - width * self._piece_length) // 2 - InfinityLoop.SIDE_WIDTH + InfinityLoop.SIDE_HEIGHT
-        self._top_left_y = (Utils.screen_height - height * self._piece_length) // 2 - InfinityLoop.SIDE_WIDTH + InfinityLoop.SIDE_HEIGHT
+        self._piece_length = 2 * self._part_height - self._part_width
+        self._top_left_x, self._top_left_y = Anchor.center(self._part_height - self._part_width, self._part_height -
+                                self._part_width, self._width * self._piece_length, self._height * self._piece_length)
         self._game_data = game_data
+        self._set_game = False
+        restart_button = Button(80, 50, *Anchor.top_left(70, 10), pygame.Color('orange'), text="Restart",
+                                name='restart_button')
+        restart_button.add_on_click(self.reset, game_data=self._game_data)
+        message_text = Text(*Anchor.top_middle(0, 40, 0), '', pygame.Color('black'), 50, 'score_text')
 
+        self.add_child(message_text)
+        self.add_child(restart_button)
         self.new_game()
-
-    def draw(self, screen):
-        for i in range(len(self._piece_board)):
-            for j in range(len(self._piece_board[i])):
-                if self._piece_board[i][j]:
-                    self._piece_board[i][j].draw(screen)
-
-    def check_click(self, mouse_x, mouse_y):
-        for i in range(len(self._piece_board)):
-            for j in range(len(self._piece_board[i])):
-                if self._piece_board[i][j]:
-                    self._piece_board[i][j].check_click(mouse_x, mouse_y)
-        if self._is_solved():
-            self.new_game()
-
-    def update(self):
-        pass
 
     def new_game(self):
         self._piece_board = [[None for _ in range(self._width)] for _ in range(self._height)]
+        self.children = [self.get_object_by_name('restart_button'), self.get_object_by_name('score_text')]
+        self.get_object_by_name('score_text').set_text('')
 
         if self._game_data:
             self._board = copy.deepcopy(self._game_data)
@@ -47,10 +44,10 @@ class InfinityLoop:
             self._board = [[0 for _ in range(self._width)] for _ in range(self._height)]
             for i in range(self._height):
                 for j in range(self._width):
-                    if random.random() > Utils.GAME_OF_LIFE_INITIAL_SPAWN_CHANCE:
+                    if random.random() > 0.5:
                         self._board[i][j] = 1
 
-            for i in range(Utils.GAME_OF_LIFE_ITERATIONS):
+            for i in range(5):
                 self._game_of_life()
 
         for x in range(self._height):
@@ -66,6 +63,35 @@ class InfinityLoop:
                     piece.rotate(random.randint(0, 3))
                     self._board[x][y] = piece.state
                     self._piece_board[x][y] = piece
+                    self.add_child(piece)
+
+    def reset(self, width=-1, height=-1, game_data=None):
+
+        if not self._set_game:
+            if width == height == -1:
+                self._width = random.randint(3, 12)
+                self._height = random.randint(4, 9)
+            else:
+                self._width = width
+                self._height = height
+            self._game_data = game_data
+
+        self._top_left_x, self._top_left_y = Anchor.center(self._part_height - self._part_width, self._part_height -
+                                                           self._part_width, self._width * self._piece_length,
+                                                           self._height * self._piece_length)
+
+        self.new_game()
+
+
+    def change_game_mode(self, is_set_game):
+        self._set_game = is_set_game
+
+    def _update(self):
+        if self._is_solved():
+            if self._set_game:
+                self.get_object_by_name('score_text').set_text('You win!')
+            else:
+                self.reset()
 
     def _is_solved(self):
         for i in range(len(self._piece_board)):
@@ -103,11 +129,11 @@ class InfinityLoop:
                 ])
 
                 if self._board[x][y] == 1:
-                    if (live_neighbours < Utils.GAME_OF_LIFE_LIVE_LOW_NEIGHBOUR_NUMBER
-                            or live_neighbours > Utils.GAME_OF_LIFE_DIE_HIGH_NEIGHBOUR_NUMBER):
+                    if (live_neighbours < 2
+                            or live_neighbours > 6):
                         new_board[x][y] = 0
                 else:
-                    if live_neighbours < Utils.GAME_OF_LIFE_LIVE_LOW_NEIGHBOUR_NUMBER:
+                    if live_neighbours < 3:
                         new_board[x][y] = 1
 
         self._board = new_board
