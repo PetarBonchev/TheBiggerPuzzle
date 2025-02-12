@@ -1,6 +1,8 @@
 import pygame
 import GlobalVariables
 from Button import Button
+from PuzzlePartUI import PuzzlePart
+from Text import Text
 from ColorConnect import ColorConnect
 from InfinityLoop import InfinityLoop
 from LevelSystem import LevelSystem
@@ -27,9 +29,8 @@ class WindowContentFiller:
     def _define_main_menu(window_system):
         window = Window(pygame.Color('grey'), 'main_window')
 
-        title_width, title_height = Anchor.get_proportions(1/3, 1/10)
-        title = Button(title_width,title_height, *Anchor.top_middle(0,10,title_width),
-                       pygame.Color('orange'), text='THE BIGGER PUZZLE', font_size=60, name='title')
+        title = Text(*Anchor.top_middle(0,60,0),'THE BIGGER PUZZLE',
+                        font_size=60, name='title')
 
         game_button_width, game_button_height = Anchor.get_proportions(1/4, 1/4)
 
