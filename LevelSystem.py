@@ -107,7 +107,7 @@ class LevelSystem(GameObject):
 
     def _spawn_level(self, on_click, level_number, is_complete):
         size = GlobalVariables.screen_height * GlobalVariables.LEVEL_BUTTON_TO_HEIGHT
-        button_color = pygame.Color('green') if is_complete else pygame.Color('orange')
+        button_color = (0, 200, 0) if is_complete else pygame.Color('orange')
         level = Button(size, size, *Anchor.center((level_number - 1) % GlobalVariables.LEVEL_BUTTONS_IN_ROW * (size + 10),
                                                  (level_number - 1) // GlobalVariables.LEVEL_BUTTONS_IN_ROW * (size + 10),
                                                  GlobalVariables.LEVEL_BUTTONS_IN_ROW * (size + 10),

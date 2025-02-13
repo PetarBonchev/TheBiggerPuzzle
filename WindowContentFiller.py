@@ -22,6 +22,7 @@ class WindowContentFiller:
         WindowContentFiller._define_infinity_loop_window(window_system)
         WindowContentFiller._define_water_sort_window(window_system)
         WindowContentFiller._define_color_connect_window(window_system)
+        WindowContentFiller._define_quit_window(window_system)
 
         window_system.go_to_window('main_window')
 
@@ -44,7 +45,6 @@ class WindowContentFiller:
                                             GlobalVariables.COLOR_CONNECT_GAME_ID)))
 
         _, piece_size = Anchor.get_proportions(1, 1 / 3)
-        print(2 * piece_size)
         bigger_puzzle = Puzzle(*Anchor.center(0, 50, 2 * piece_size, 2 * piece_size), on_click_data, piece_size, 'output.png')
 
         window.add_child(title)
@@ -60,7 +60,7 @@ class WindowContentFiller:
         back_to_menu_button.add_on_click(window_system.go_to_window, 'main_window')
 
         endless_mode_button = Button(100, 50, *Anchor.top_right(10, 10, 100),
-                                     pygame.Color('green'), text='ENDLESS', name='endless_button')
+                                     (0, 200, 0), text='ENDLESS', name='endless_button')
 
         level_system = LevelSystem(window_system, 'level_system')
 
@@ -135,5 +135,28 @@ class WindowContentFiller:
 
         window.add_child(back_to_levels_button)
         window.add_child(color_connect)
+
+        window_system.add_child(window)
+
+    @staticmethod
+    def _define_quit_window(window_system):
+        window = Window(pygame.Color('yellow'), 'quit_window')
+
+        question_text = Text(*Anchor.center(0, -100, 0, 0), 'Do you want to quit?',
+                             font_size=75, font_path='LuckiestGuy.ttf')
+
+        quit_button = Button(300, 150, *Anchor.center(-175, 50, 300, 150),
+                             pygame.Color('red'), text='Quit', font_size=50)
+        def quit_game():
+            GlobalVariables.game_running = False
+        quit_button.add_on_click(quit_game)
+
+        stay_button = Button(300, 150, *Anchor.center(175, 50, 300, 150),
+                             (0, 200, 0), text='Stay', font_size=50)
+        stay_button.add_on_click(window_system.go_to_window, 'main_window')
+
+        window.add_child(quit_button)
+        window.add_child(stay_button)
+        window.add_child(question_text)
 
         window_system.add_child(window)

@@ -55,7 +55,7 @@ class WheelOfColors(GameObject):
         clicked_color = self.get_object_by_name('color_wheel').clicked_sector(mouse_x, mouse_y)
         if 0 <= clicked_color < self._color_count:
             self._receive_color(clicked_color)
-            self.get_object_by_name('color_wheel').set_display_pattern([clicked_color], pygame.Color('green'))
+            self.get_object_by_name('color_wheel').set_display_pattern([clicked_color], (0, 200, 0))
 
     def _update(self):
         match self._game_state:

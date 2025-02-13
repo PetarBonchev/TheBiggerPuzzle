@@ -3,6 +3,7 @@ game_running = True
 screen_width = 0
 screen_height = 0
 window_system = None
+current_window = 'main_window'
 
 HIGHLIGHT_FRAME_DURATION = 15
 FRAMES_BETWEEN_HIGHLIGHTS = 3

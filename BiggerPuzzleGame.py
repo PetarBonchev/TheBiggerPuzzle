@@ -45,7 +45,7 @@ class Puzzle(GameObject):
         self.add_child(wheel_piece)
 
         infinity_loop_piece = PuzzlePart(self._top_left_x + self._piece_size, self._top_left_y, (0, 0, 1, -1), self._piece_size,
-                                 text='Infinity loop', score_text='0/0', name='infinity_loop_piece')
+                                text='Infinity loop', score_text='0/0', name='infinity_loop_piece')
         for on_click in on_click_data[1]:
             infinity_loop_piece.add_on_click(*on_click)
         self.add_child(infinity_loop_piece)

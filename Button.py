@@ -7,7 +7,7 @@ class Button(GameObject):
     ROUND_CORNERS_RADIUS = 10
 
     def __init__(self, width, height, top_left_x, top_left_y, fill_color=pygame.Color('grey'),
-                 outline_width=2, outline_color=pygame.Color('black'),
+                 outline_width=2, outline_color=pygame.Color('black'), highlight_color = pygame.Color('white'),
                  text=None, text_color=pygame.Color('black'), font_size=25, name='button'):
         super().__init__(name)
 
@@ -16,6 +16,7 @@ class Button(GameObject):
         self._top_left_x = top_left_x
         self._top_left_y = top_left_y
         self._fill_color = fill_color
+        self._highlight_color = highlight_color
         self._outline_width = outline_width
         self._outline_color = outline_color
         if text:
@@ -37,7 +38,7 @@ class Button(GameObject):
 
     def _draw(self, screen):
         if self._is_hovered():
-            pygame.draw.rect(screen, pygame.Color('white'), pygame.Rect(self._top_left_x, self._top_left_y,
+            pygame.draw.rect(screen, self._highlight_color, pygame.Rect(self._top_left_x, self._top_left_y,
                                     self._width, self._height), border_radius=Button.ROUND_CORNERS_RADIUS)
         else:
             pygame.draw.rect(screen, self._fill_color, pygame.Rect(self._top_left_x, self._top_left_y,

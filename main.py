@@ -24,8 +24,9 @@ while GlobalVariables.game_running:
         if event.type == pygame.QUIT:
             GlobalVariables.game_running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                GlobalVariables.game_running = False
+            if (event.key == pygame.K_ESCAPE and
+                    GlobalVariables.current_window == 'main_window'):
+                window_system.go_to_window('quit_window')
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 window_system.check_click(*event.pos)
