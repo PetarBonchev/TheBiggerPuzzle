@@ -1,7 +1,7 @@
 import pygame
 import GlobalVariables
+from BiggerPuzzleGame import Puzzle
 from Button import Button
-from PuzzlePartUI import PuzzlePart
 from Text import Text
 from ColorConnect import ColorConnect
 from InfinityLoop import InfinityLoop
@@ -29,49 +29,26 @@ class WindowContentFiller:
     def _define_main_menu(window_system):
         window = Window(pygame.Color('grey'), 'main_window')
 
-        title = Text(*Anchor.top_middle(0,60,0),'THE BIGGER PUZZLE',
-                        font_size=60, name='title')
+        title = Text(*Anchor.top_middle(0,100,0),'THE BIGGER PUZZLE',
+                        color=pygame.Color('black'), font_size=80, name='title', font_path='LuckiestGuy.ttf')
 
-        game_button_width, game_button_height = Anchor.get_proportions(1/4, 1/4)
+        on_click_data = []
 
-        wheel_of_colors_button = Button(game_button_width, game_button_height,
-                                        *Anchor.center(-game_button_width // 2, -game_button_height // 2,
-                                                       game_button_width, game_button_height),
-                                        pygame.Color('green'), text='Wheel of colors', name='wheel_button')
-        wheel_of_colors_button.add_on_click(window_system.go_to_window, 'level_select_window')
-        wheel_of_colors_button.add_on_click(window_system.get_object_by_name('level_system').load,
-                                            GlobalVariables.WHEEL_OF_COLORS_GAME_ID)
+        on_click_data.append(((window_system.go_to_window, 'level_select_window'),
+                              (window_system.get_object_by_name('level_system').load, GlobalVariables.WHEEL_OF_COLORS_GAME_ID)))
+        on_click_data.append(((window_system.go_to_window, 'level_select_window'), (window_system.get_object_by_name('level_system').load,
+                                            GlobalVariables.INFINITY_LOOP_GAME_ID)))
+        on_click_data.append(((window_system.go_to_window, 'level_select_window'), (window_system.get_object_by_name('level_system').load,
+                                            GlobalVariables.WATER_SORT_GAME_ID)))
+        on_click_data.append(((window_system.go_to_window, 'level_select_window'), (window_system.get_object_by_name('level_system').load,
+                                            GlobalVariables.COLOR_CONNECT_GAME_ID)))
 
-        infinity_loop_button = Button(game_button_width, game_button_height,
-                                        *Anchor.center(game_button_width // 2, -game_button_height // 2,
-                                                       game_button_width, game_button_height),
-                                        pygame.Color('green'), text='Infinity loop', name='infinity_button')
-        infinity_loop_button.add_on_click(window_system.go_to_window, 'level_select_window')
-        infinity_loop_button.add_on_click(window_system.get_object_by_name('level_system').load,
-                                            GlobalVariables.INFINITY_LOOP_GAME_ID)
-
-        water_sort_button = Button(game_button_width, game_button_height,
-                                        *Anchor.center(-game_button_width // 2, game_button_height // 2,
-                                                       game_button_width, game_button_height),
-                                        pygame.Color('green'), text='Water sort', name='water_button')
-        water_sort_button.add_on_click(window_system.go_to_window, 'level_select_window')
-        water_sort_button.add_on_click(window_system.get_object_by_name('level_system').load,
-                                            GlobalVariables.WATER_SORT_GAME_ID)
-
-        color_connect_button = Button(game_button_width, game_button_height,
-                                        *Anchor.center(game_button_width // 2, game_button_height // 2,
-                                                       game_button_width, game_button_height),
-                                        pygame.Color('green'), text='Color connect', name='color_button')
-        color_connect_button.add_on_click(window_system.go_to_window, 'level_select_window')
-        color_connect_button.add_on_click(window_system.get_object_by_name('level_system').load,
-                                            GlobalVariables.COLOR_CONNECT_GAME_ID)
+        _, piece_size = Anchor.get_proportions(1, 1 / 3)
+        print(2 * piece_size)
+        bigger_puzzle = Puzzle(*Anchor.center(0, 50, 2 * piece_size, 2 * piece_size), on_click_data, piece_size, 'output.png')
 
         window.add_child(title)
-        window.add_child(wheel_of_colors_button)
-        window.add_child(infinity_loop_button)
-        window.add_child(water_sort_button)
-        window.add_child(color_connect_button)
-
+        window.add_child(bigger_puzzle)
         window_system.add_child(window)
 
     @staticmethod

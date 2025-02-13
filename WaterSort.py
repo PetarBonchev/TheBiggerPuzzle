@@ -27,10 +27,10 @@ class WaterSort(GameObject):
         self._game_state = 'new_game'
         self._selected_flask_id = -1
         self._actions = []
-        restart_button = Button(80, 50, *Anchor.top_left(70, 10), pygame.Color('orange'),
+        restart_button = Button(100, 50, *Anchor.top_left(70, 10), pygame.Color('orange'),
                                 text="Restart", name='restart_button')
         restart_button.add_on_click(self.reset)
-        undo_button = Button(80, 50, *Anchor.top_left(160, 10), pygame.Color('orange'),
+        undo_button = Button(80, 50, *Anchor.top_left(180, 10), pygame.Color('orange'),
                                 text="Undo", name='undo_button')
         undo_button.add_on_click(self.undo)
         message_text = Text(*Anchor.top_middle(0, 40, 0), '', pygame.Color('black'), 50, 'score_text')
@@ -58,8 +58,10 @@ class WaterSort(GameObject):
         if not self._set_game:
             self._height = random.randint(3, 6)
             self._flask_count = random.randint(4, 10)
+            self.get_object_by_name('restart_button').set_text('New game')
             self.new_game()
         else:
+            self.get_object_by_name('restart_button').set_text('Restart')
             if height != -1 and flask_count != -1:
                 self._height = height
                 self._flask_count = flask_count
@@ -96,6 +98,7 @@ class WaterSort(GameObject):
             if self._set_game:
                 self.get_object_by_name('score_text').set_text('You win!')
                 LevelSystem.complete_level(GlobalVariables.WATER_SORT_GAME_ID, self._level_id)
+                GlobalVariables.window_system.get_object_by_name('bigger_puzzle').update_solved_puzzles()
             else:
                 self.reset()
 

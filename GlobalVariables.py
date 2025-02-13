@@ -2,6 +2,7 @@
 game_running = True
 screen_width = 0
 screen_height = 0
+window_system = None
 
 HIGHLIGHT_FRAME_DURATION = 15
 FRAMES_BETWEEN_HIGHLIGHTS = 3
@@ -22,18 +23,18 @@ GAME_DATA_FILES = ['wheel_of_colors_data.txt', 'infinity_loop_data.txt',
 
 #games
 COLORS = [
-    (227, 26, 28),
-    (31, 120, 180),
-    (51, 160, 44),
-    (255, 255, 153),
-    (106, 61, 154),
-    (255, 127, 0),
-    (177, 89, 40),
-    (166, 206, 227),
-    (251, 154, 153),
-    (253, 191, 111),
-    (202, 178, 214),
-    (178, 223, 138)
+    (255, 59, 48),
+    (0, 71, 171),
+    (255, 225, 25),
+    (0, 100, 0),
+    (255, 163, 0),
+    (173, 216, 230),
+    (255, 105, 180),
+    (0, 128, 128),
+    (147, 112, 219),
+    (144, 238, 144),
+    (255, 0, 144),
+    (139, 69, 19)
 ]
 
 #wheel of colors

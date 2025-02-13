@@ -20,7 +20,7 @@ class Button(GameObject):
         self._outline_color = outline_color
         if text:
             text = Text(self._top_left_x + self._width // 2, self._top_left_y + self._height // 2, text, text_color,
-                        font_size, name + '_text')
+                        font_size)
             self.add_child(text)
         self._on_click = []
 
@@ -29,6 +29,11 @@ class Button(GameObject):
 
     def clear_on_click(self):
         self._on_click = []
+
+    def set_text(self, text=''):
+        button_text = self.get_object_by_name('text')
+        if button_text:
+            button_text.set_text(text)
 
     def _draw(self, screen):
         if self._is_hovered():

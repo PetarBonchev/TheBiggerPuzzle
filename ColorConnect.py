@@ -30,7 +30,7 @@ class ColorConnect(GameObject):
         self._game_data = game_data
         self._set_game = False
         self._level_id = -1
-        restart_button = Button(80, 50, *Anchor.top_left(70, 10), pygame.Color('orange'), text="Restart",
+        restart_button = Button(100, 50, *Anchor.top_left(70, 10), pygame.Color('orange'), text="Restart",
                                 name='restart_button')
         restart_button.add_on_click(self.reset)
         message_text = Text(*Anchor.top_middle(0, 40, 0), '', pygame.Color('black'), 50, 'score_text')
@@ -104,6 +104,7 @@ class ColorConnect(GameObject):
                 if self._set_game:
                     self.get_object_by_name('score_text').set_text('You win!')
                     LevelSystem.complete_level(GlobalVariables.COLOR_CONNECT_GAME_ID, self._level_id)
+                    GlobalVariables.window_system.get_object_by_name('bigger_puzzle').update_solved_puzzles()
                 else:
                     self.reset()
 
@@ -141,6 +142,7 @@ class ColorConnect(GameObject):
                 self._color_count = color_count
                 self._game_data = game_data
                 self._level_id = level_number
+            self.get_object_by_name('restart_button').set_text('Restart')
             self.new_game()
             return
 
@@ -152,6 +154,7 @@ class ColorConnect(GameObject):
             self._width = width
             self._height = height
             self._color_count = color_count
+        self.get_object_by_name('restart_button').set_text('New game')
         self._game_data = game_data
         self.new_game()
 

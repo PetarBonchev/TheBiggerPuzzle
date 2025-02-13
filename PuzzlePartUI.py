@@ -1,25 +1,44 @@
 from Button import Button
-from GameObject import GameObject
+from Text import Text
 import math
 import pygame
 
-class PuzzlePart(Button):
 
+class PuzzlePart(Button):
     POINTS_IN_CURVE = 20
 
-    def __init__(self, top_left_x, top_left_y, sides, size=300,
-                 text=None, text_color=pygame.Color('black'), font_size=25, name='puzzle_part'):
-        super().__init__(size, size, top_left_x, top_left_y, name, text=text, text_color=text_color, font_size=font_size)
+    def __init__(self, top_left_x, top_left_y, sides, size=300, background_color=pygame.Color('orange'),
+                 text=None, score_text=None, text_color=pygame.Color('black'), font_size=25, name='puzzle_part'):
+        super().__init__(size, size, top_left_x, top_left_y, name=name, text=text, text_color=text_color,
+                         font_size=font_size)
         self._top_left_x = top_left_x
         self._top_left_y = top_left_y
         self._sides = sides
-        self._points = PuzzlePart._get_shape_points((self._top_left_x, self._top_left_y), size, size / 3, self._sides)
+        self._points = PuzzlePart.get_shape_points((self._top_left_x, self._top_left_y), size, 2 * size / 7,
+                                                    self._sides)
+        self._background_color = background_color
+        self._is_transparent = False
+
+        if score_text:
+            self.add_child(
+                Text(self._top_left_x + size / 2, self._top_left_y + size / 2 + 25, '0/0', name='score_text'))
+
+    def make_transparent(self):
+        self._is_transparent = True
 
     def _draw(self, screen):
+        text_obj = self.get_object_by_name('text')
+
         if self._is_hovered():
+            text_obj.set_active(True)
             pygame.draw.polygon(screen, pygame.Color('white'), self._points)
         else:
-            pygame.draw.polygon(screen, pygame.Color('red'), self._points)
+            if self._is_transparent:
+                text_obj.set_active(False)
+            else:
+                pygame.draw.polygon(screen, self._background_color, self._points)
+
+        pygame.draw.polygon(screen, pygame.Color('black'), self._points, width=2)
 
     def _is_hovered(self):
         return PuzzlePart._is_point_inside_polygon(pygame.mouse.get_pos(), self._points)
@@ -92,7 +111,7 @@ class PuzzlePart(Button):
         return points
 
     @staticmethod
-    def _rounded_corner(center, radius, start_angle, end_angle, num_points=8):
+    def _rounded_corner(center, radius, start_angle, end_angle, num_points=15):
         points = []
         for t in range(num_points + 1):
             angle = start_angle + t * (end_angle - start_angle) / num_points
@@ -100,7 +119,7 @@ class PuzzlePart(Button):
         return points
 
     @staticmethod
-    def _get_shape_points(top_left, size, head_size, sides, corner_radius=8):
+    def get_shape_points(top_left, size, head_size, sides, corner_radius=20):
         points = []
         corner_points = set()
         offsets = [(0, 0), (size, 0), (size, size), (0, size)]
@@ -108,12 +127,13 @@ class PuzzlePart(Button):
             (top_left[0] + size - corner_radius, top_left[1] + corner_radius),
             (top_left[0] + size - corner_radius, top_left[1] + size - corner_radius),
             (top_left[0] + corner_radius, top_left[1] + size - corner_radius)]
+        angles = [(180, 270), (270, 360), (0, 90), (90, 180)]
 
         for i in range(4):
             next_corner = (top_left[0] + offsets[i][0], top_left[1] + offsets[i][1])
             if sides[i - 1] == 0 and sides[i] == 0:
                 points.extend(PuzzlePart._rounded_corner(corner_positions[i], corner_radius,
-                    math.radians((i + 2) * 90 % 360), math.radians((i + 3) * 90 % 360)))
+                    math.radians(angles[i][0]), math.radians(angles[i][1])))
                 corner_points.add(next_corner)
             else:
                 points.append(next_corner)

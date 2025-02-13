@@ -16,6 +16,7 @@ AnchorCalculator.screen_height = info.current_h
 
 screen = pygame.display.set_mode((info.current_w, info.current_h), pygame.FULLSCREEN | pygame.SCALED)
 window_system = WindowManager()
+GlobalVariables.window_system = window_system
 WindowContentFiller.define_window_manager_windows(window_system)
 
 while GlobalVariables.game_running:

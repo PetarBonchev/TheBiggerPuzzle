@@ -17,7 +17,7 @@ class WheelOfColors(GameObject):
         self._radius = GlobalVariables.screen_height * GlobalVariables.WOC_RADIUS_TO_HEIGHT_RATIO
         color_wheel = ColorWheel(self._color_count, *Anchor.center(0, 0, 0, 0), self._radius, name='color_wheel')
         score_text = Text(*Anchor.top_middle(0, 40, 0), 'Score: 0', pygame.Color('black'), 50, 'score_text')
-        restart_button = Button(80, 50, *Anchor.top_left(70, 10), pygame.Color('orange'), text="Restart", name='restart_button')
+        restart_button = Button(100, 50, *Anchor.top_left(70, 10), pygame.Color('orange'), text="Restart", name='restart_button')
         restart_button.add_on_click(self.new_game)
 
         self.add_child(color_wheel)
@@ -43,10 +43,11 @@ class WheelOfColors(GameObject):
         self._color_count = color_count
         self._game_data = game_data
         self._level_id = level_id
+        if game_data:
+            self.get_object_by_name('restart_button').set_text('Restart')
+        else:
+            self.get_object_by_name('restart_button').set_text('New game')
         self.new_game()
-
-    def _draw(self, screen):
-        pass
 
     def _check_click(self, mouse_x, mouse_y):
         if self._game_state != 'wait_for_input':
@@ -54,7 +55,7 @@ class WheelOfColors(GameObject):
         clicked_color = self.get_object_by_name('color_wheel').clicked_sector(mouse_x, mouse_y)
         if 0 <= clicked_color < self._color_count:
             self._receive_color(clicked_color)
-            self.get_object_by_name('color_wheel').set_display_pattern([clicked_color], pygame.Color('black'))
+            self.get_object_by_name('color_wheel').set_display_pattern([clicked_color], pygame.Color('green'))
 
     def _update(self):
         match self._game_state:
@@ -88,6 +89,7 @@ class WheelOfColors(GameObject):
                 if self._game_data and len(self._game_data) == len(self._pattern):
                     self.get_object_by_name('score_text').set_text("You win!")
                     LevelSystem.complete_level(GlobalVariables.WHEEL_OF_COLORS_GAME_ID, self._level_id)
+                    GlobalVariables.window_system.get_object_by_name('bigger_puzzle').update_solved_puzzles()
                     self._game_state = 'game_ended'
                 else:
                     self.get_object_by_name('score_text').set_text(f"Score: {len(self._pattern)}")

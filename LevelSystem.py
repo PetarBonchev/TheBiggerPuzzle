@@ -121,6 +121,10 @@ class LevelSystem(GameObject):
     _DATA_FILE = 'completed_levels.enc'
 
     @staticmethod
+    def get_completed_levels():
+        return LevelSystem._get_completed_levels(LevelSystem._read_completed_levels_data())
+
+    @staticmethod
     def _get_cipher():
         if not os.path.exists(LevelSystem._KEY_FILE):
             key = Fernet.generate_key()

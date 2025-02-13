@@ -28,9 +28,6 @@ class PointConnect(GameObject):
         return self._center_x - self._click_box_size // 2 <= mouse_x < self._center_x + self._click_box_size // 2 and (
             self._center_y - self._click_box_size // 2 <= mouse_y < self._center_y + self._click_box_size // 2)
 
-    def update(self):
-        pass
-
     def _draw_half_line_from_center(self, screen, item_towards):
         if self.board_x < item_towards.board_x:
             pygame.draw.rect(screen, self.color, (self._center_x - self._click_box_size // 4,
