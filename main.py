@@ -1,9 +1,8 @@
 import pygame
 
-import GlobalVariables
-from WindowManager import WindowManager
-from WindowContentFiller import WindowContentFiller
-import AnchorCalculator
+from UI_Elements.WindowManager import WindowManager
+from UI_Elements.WindowContentFiller import WindowContentFiller
+from Utilities import AnchorCalculator, GlobalVariables
 
 pygame.init()
 clock = pygame.time.Clock()
