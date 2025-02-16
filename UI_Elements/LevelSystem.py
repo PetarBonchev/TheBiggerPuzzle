@@ -1,13 +1,20 @@
-import os
-from cryptography.fernet import Fernet
 import pygame
+from Utilities.LevelsIO import LevelsIO
 from Utilities import GlobalVariables
 from Utilities.AnchorCalculator import Anchor
 from UI_Elements.GameObject import GameObject
 from UI_Elements.Button import Button
 
 
-class LevelSystem(GameObject):
+class Singleton:
+    instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.instance is None:
+            cls.instance = super().__new__(cls)
+        return cls.instance
+
+class LevelSystem(GameObject, Singleton):
 
     def __init__(self, window_system, name='level_system'):
         super().__init__(name)
@@ -20,7 +27,7 @@ class LevelSystem(GameObject):
             game_data = [line.strip() for line in data]
             self._window_system.get_object_by_name('endless_button').clear_on_click()
             self.children = []
-            completed_levels = LevelSystem._get_completed_levels(LevelSystem._read_completed_levels_data())
+            completed_levels = LevelsIO.get_completed_levels()
             match game_id:
                 case 0:
                     self._load_wheel_of_colors_levels(game_data, completed_levels[0])
@@ -30,6 +37,10 @@ class LevelSystem(GameObject):
                     self._load_water_sort_levels(game_data, completed_levels[2])
                 case 3:
                     self._load_color_connect_levels(game_data, completed_levels[3])
+
+    def complete_level(self, game_id, level_number):
+        LevelsIO.complete_level(game_id, level_number)
+        self._window_system.get_object_by_name('bigger_puzzle').update_solved_puzzles()
 
     def _load_wheel_of_colors_levels(self, data, completed_levels):
         endless_button = self._window_system.get_object_by_name('endless_button')
@@ -116,70 +127,3 @@ class LevelSystem(GameObject):
         for function_call in on_click:
             level.add_on_click(function_call[0], *function_call[1])
         self.add_child(level)
-
-    _KEY_FILE = 'Utilities/encryption_key.key'
-    _DATA_FILE = 'Utilities/completed_levels.enc'
-
-    @staticmethod
-    def get_completed_levels():
-        return LevelSystem._get_completed_levels(LevelSystem._read_completed_levels_data())
-
-    @staticmethod
-    def _get_cipher():
-        if not os.path.exists(LevelSystem._KEY_FILE):
-            key = Fernet.generate_key()
-            with open(LevelSystem._KEY_FILE, 'wb') as key_file:
-                key_file.write(key)
-        else:
-            with open(LevelSystem._KEY_FILE, 'rb') as key_file:
-                key = key_file.read()
-
-        return Fernet(key)
-
-    @staticmethod
-    def complete_level(game_id, level_number):
-        file_data = LevelSystem._read_completed_levels_data()
-        if LevelSystem._is_level_completed(game_id, level_number, file_data):
-            return
-
-        while len(file_data) <= game_id:
-            file_data.append('')
-        file_data[game_id] += ' ' + str(level_number)
-
-        cipher = LevelSystem._get_cipher()
-        encrypted_data = cipher.encrypt('\n'.join(file_data).encode())
-        with open(LevelSystem._DATA_FILE, 'wb') as file:
-            file.write(encrypted_data)
-
-    @staticmethod
-    def _read_completed_levels_data():
-        if not os.path.exists(LevelSystem._DATA_FILE):
-            return []
-
-        cipher = LevelSystem._get_cipher()
-        with open(LevelSystem._DATA_FILE, 'rb') as file:
-            encrypted_data = file.read()
-            decrypted_data = cipher.decrypt(encrypted_data).decode()
-            file_data = [row.strip() for row in decrypted_data.split('\n')]
-        return file_data
-
-    @staticmethod
-    def _is_level_completed(game_id, level_number, file_data):
-        if len(file_data) < game_id + 1:
-            return False
-        for level in file_data[game_id].split():
-            if int(level) == level_number:
-                return True
-        return False
-
-    @staticmethod
-    def _get_completed_levels(file_data):
-        levels = []
-        for row in file_data:
-            completed = set()
-            for element in row.split():
-                completed.add(int(element))
-            levels.append(completed)
-        while len(levels) < 4:
-            levels.append(set())
-        return levels

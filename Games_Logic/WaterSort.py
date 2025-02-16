@@ -96,8 +96,7 @@ class WaterSort(GameObject):
         elif self._game_state == 'complete':
             if self._set_game:
                 self.get_object_by_name('score_text').set_text('You win!')
-                LevelSystem.complete_level(GlobalVariables.WATER_SORT_GAME_ID, self._level_id)
-                GlobalVariables.window_system.get_object_by_name('bigger_puzzle').update_solved_puzzles()
+                LevelSystem.instance.complete_level(GlobalVariables.WATER_SORT_GAME_ID, self._level_id)
             else:
                 self.reset()
 

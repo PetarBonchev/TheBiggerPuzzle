@@ -49,8 +49,7 @@ class Button(GameObject):
 
     def _check_click(self, mouse_x, mouse_y):
         if self._is_hovered():
-            for for_call in self._on_click:
-                for_call[0](*for_call[1], **for_call[2])
+            self._execute_on_click()
             return True
         return False
 
@@ -58,3 +57,7 @@ class Button(GameObject):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         return self._top_left_x <= mouse_x <= self._top_left_x + self._width and \
             self._top_left_y <= mouse_y <= self._top_left_y + self._height
+
+    def _execute_on_click(self):
+        for for_call in self._on_click:
+            for_call[0](*for_call[1], **for_call[2])

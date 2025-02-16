@@ -101,8 +101,7 @@ class InfinityLoop(GameObject):
         if self._is_solved():
             if self._set_game:
                 self.get_object_by_name('score_text').set_text('You win!')
-                LevelSystem.complete_level(GlobalVariables.INFINITY_LOOP_GAME_ID, self._level_id)
-                GlobalVariables.window_system.get_object_by_name('bigger_puzzle').update_solved_puzzles()
+                LevelSystem.instance.complete_level(GlobalVariables.INFINITY_LOOP_GAME_ID, self._level_id)
             else:
                 self.reset()
 

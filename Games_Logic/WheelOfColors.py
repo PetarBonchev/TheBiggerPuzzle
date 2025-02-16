@@ -88,8 +88,7 @@ class WheelOfColors(GameObject):
             if self._color_to_receive >= len(self._pattern):
                 if self._game_data and len(self._game_data) == len(self._pattern):
                     self.get_object_by_name('score_text').set_text("You win!")
-                    LevelSystem.complete_level(GlobalVariables.WHEEL_OF_COLORS_GAME_ID, self._level_id)
-                    GlobalVariables.window_system.get_object_by_name('bigger_puzzle').update_solved_puzzles()
+                    LevelSystem.instance.complete_level(GlobalVariables.WHEEL_OF_COLORS_GAME_ID, self._level_id)
                     self._game_state = 'game_ended'
                 else:
                     self.get_object_by_name('score_text').set_text(f"Score: {len(self._pattern)}")

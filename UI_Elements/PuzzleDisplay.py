@@ -1,11 +1,14 @@
 import random
 import pygame
-from UI_Elements.PuzzlePartUI import PuzzlePart
+
+from UI_Elements.GameObject import GameObject
+from Utilities.PuzzlePointsCalculator import PuzzlePointsCalculator
 
 
-class PuzzleDisplay:
+class PuzzleDisplay(GameObject):
 
-    def __init__(self, width, height, piece_size):
+    def __init__(self, width, height, piece_size, name='puzzle_display'):
+        super().__init__(name)
         self._width = width
         self._height = height
         self._piece_size = piece_size
@@ -38,8 +41,10 @@ class PuzzleDisplay:
         for i in range(rows):
             for j in range(cols):
                 if random.randint(0, 3) == 1:
-                    self._pieces.append((PuzzlePart.get_shape_points((j * self._piece_size + width_diff / 2, i * self._piece_size + height_diff / 2), self._piece_size, self._piece_size / 3, board[i][j]), pygame.Color('grey')))
+                    self._pieces.append((PuzzlePointsCalculator.get_shape_points(
+                        (j * self._piece_size + width_diff / 2, i * self._piece_size + height_diff / 2),
+                        self._piece_size, self._piece_size / 3, board[i][j]), pygame.Color('grey')))
 
-    def draw(self, screen):
+    def _draw(self, screen):
         for points, color in self._pieces:
             pygame.draw.polygon(screen, (183, 174, 209), points, 5)

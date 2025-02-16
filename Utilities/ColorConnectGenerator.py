@@ -4,7 +4,7 @@ import random
 class ColorTableGenerator:
 
     MIN_TRAIL_LENGTH = 2
-    MAX_OPERATIONS = 100
+    MAX_OPERATIONS = 200
 
     def __init__(self, width, height, color_count):
         self._colors = color_count

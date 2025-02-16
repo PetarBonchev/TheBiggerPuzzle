@@ -16,7 +16,6 @@ class LineConnect(GameObject):
         self.prev = None
         self.next = None
 
-
     def draw(self, screen):
 
         if not self.next or self.prev.board_x == self.next.board_x or self.prev.board_y == self.next.board_y:
@@ -33,9 +32,6 @@ class LineConnect(GameObject):
     def check_click(self, mouse_x, mouse_y):
         return self._center_x - self._side_size // 2 <= mouse_x < self._center_x + self._side_size // 2 and (
                 self._center_y - self._side_size // 2 <= mouse_y < self._center_y + self._side_size // 2)
-
-    def update(self):
-        pass
 
     def _draw_half_line_from_center(self, screen, item_towards):
         if self.board_x < item_towards.board_x:

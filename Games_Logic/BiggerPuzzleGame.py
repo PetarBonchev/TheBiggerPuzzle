@@ -1,8 +1,8 @@
 import pygame
 from Utilities import GlobalVariables
-from UI_Elements.LevelSystem import LevelSystem
 from UI_Elements.GameObject import GameObject
 from UI_Elements.PuzzlePartUI import PuzzlePart
+from Utilities.LevelsIO import LevelsIO
 
 
 class Puzzle(GameObject):
@@ -19,7 +19,7 @@ class Puzzle(GameObject):
         self.update_solved_puzzles()
 
     def update_solved_puzzles(self):
-        completed_levels = LevelSystem.get_completed_levels()
+        completed_levels = LevelsIO.get_completed_levels()
         games = [('wheel_of_colors_piece', GlobalVariables.WHEEL_OF_COLORS_GAME_ID),
                  ('infinity_loop_piece', GlobalVariables.INFINITY_LOOP_GAME_ID),
                  ('water_sort_piece', GlobalVariables.WATER_SORT_GAME_ID),
